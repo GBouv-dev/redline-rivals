@@ -1,0 +1,546 @@
+/* ============================================================
+   REDLINE RIVALS — card-edit.css
+   Auto-extrait de app.css — Chargement conditionnel par page
+   ============================================================ */
+
+/* ============================================
+   REDLINE RIVALS - PAGE ÉDITION CARTE (EDIT)
+   Design Terminal Cyberpunk
+   ============================================ */
+
+/* ====================================
+   CONTENEUR PRINCIPAL
+   ==================================== */
+.card-edit-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    position: relative;
+}
+
+/* Titre principal avec effet glitch */
+.card-edit-container h1 {
+    font-family: var(--font-head);
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 
+        0 0 10px var(--accent),
+        2px 2px 0 var(--primary);
+    animation: glitchAnim 8s infinite;
+}
+
+/* Sous-titre/indication */
+.card-edit-container h1::after {
+    content: "// MODIFICATION EN COURS";
+    display: block;
+    font-size: 0.4em;
+    color: rgba(0, 243, 255, 0.6);
+    margin-top: 10px;
+    letter-spacing: 2px;
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* ====================================
+   FORMULAIRE - TERMINAL STYLE
+   ==================================== */
+.card-edit-form {
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(255, 0, 60, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(15, 15, 20, 0.98) 0%, rgba(5, 5, 10, 0.99) 100%);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 15px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        inset 0 0 40px rgba(0, 243, 255, 0.03);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* En-tête du terminal */
+.card-edit-form::before {
+    content: "TERMINAL_ACCESS > CARD_EDITOR_V2.1 | STATUS: ACTIVE";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 20px;
+    background: rgba(0, 243, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Grille de fond cyberpunk */
+.card-edit-form::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 30px,
+            rgba(0, 243, 255, 0.02) 30px,
+            rgba(0, 243, 255, 0.02) 32px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 30px,
+            rgba(255, 0, 60, 0.02) 30px,
+            rgba(255, 0, 60, 0.02) 32px
+        );
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Contenu du formulaire */
+.card-edit-form > * {
+    position: relative;
+    z-index: 1;
+    margin-top: 50px; /* Espace pour l'en-tête du terminal */
+}
+
+/* ====================================
+   GROUPES DE FORMULAIRE
+   ==================================== */
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+/* Labels - Style terminal */
+.form-group label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    position: relative;
+    padding-left: 20px;
+}
+
+/* Indicateur devant les labels */
+.form-group label::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-size: 1.2rem;
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Indicateur requis */
+.form-group label.required::after {
+    content: "*";
+    color: var(--primary);
+    margin-left: 5px;
+    font-size: 1.2em;
+}
+
+/* ====================================
+   CHAMPS DE SAISIE
+   ==================================== */
+.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 5px;
+    color: #e0e0e0;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(0, 243, 255, 0.05);
+    box-shadow: 
+        0 0 20px rgba(0, 243, 255, 0.2),
+        inset 0 0 10px rgba(0, 243, 255, 0.05);
+    transform: translateX(3px);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+}
+
+/* Select personnalisé */
+select.form-control {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300f3ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 45px;
+}
+
+/* Textarea */
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+}
+
+/* Input file (pour l'image) */
+input[type="file"].form-control {
+    padding: 12px;
+    cursor: pointer;
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+}
+
+input[type="file"].form-control::-webkit-file-upload-button {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+input[type="file"].form-control::-webkit-file-upload-button:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* ====================================
+   MESSAGES D'ERREUR ET D'AIDE
+   ==================================== */
+.form-error {
+    display: block;
+    color: var(--primary);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.form-error::before {
+    content: "⚠";
+    position: absolute;
+    left: 0;
+    animation: glow 1s ease-in-out infinite;
+}
+
+.form-help {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    padding-left: 20px;
+    font-style: italic;
+}
+
+/* ====================================
+   PREVIEW IMAGE (si présente)
+   ==================================== */
+.image-preview {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.image-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border: 2px solid var(--accent);
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+    filter: brightness(1.1);
+}
+
+.image-preview-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+/* ====================================
+   BOUTONS D'ACTION
+   ==================================== */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px dashed rgba(0, 243, 255, 0.2);
+}
+
+.form-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 14px 30px;
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    text-align: center;
+    border: 2px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+/* Bouton "Retour à la liste" */
+.btn-back-list {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.btn-back-list:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Bouton "Update/Save" */
+.btn-update {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 800;
+}
+
+.btn-update:hover {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 
+        0 0 30px rgba(0, 243, 255, 0.4),
+        inset 0 0 20px rgba(0, 243, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Bouton "Supprimer" */
+.btn-delete-form {
+    background: transparent;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-delete-form:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 25px var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Effet de lueur animée sur les boutons */
+.form-btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.form-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* État désactivé */
+.form-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #444;
+    color: #666;
+}
+
+.form-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* ====================================
+   INDICATEUR DE CHARGEMENT
+   ==================================== */
+.form-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 30px 50px;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 0 40px rgba(0, 243, 255, 0.4);
+}
+
+.form-loading::before {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    border: 3px solid rgba(0, 243, 255, 0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.form-loading-text {
+    font-family: var(--font-head);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: glow 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ====================================
+   ZONE DE DANGER (SUPPRESSION)
+   ==================================== */
+.danger-zone {
+    margin-top: 50px;
+    padding: 25px;
+    background: rgba(255, 0, 60, 0.05);
+    border: 1px dashed var(--primary);
+    border-radius: 10px;
+    position: relative;
+}
+
+.danger-zone::before {
+    content: "⚠ DANGER ZONE";
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    padding: 0 10px;
+    background: var(--bg-dark);
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+}
+
+.danger-zone-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.danger-zone-text {
+    flex: 1;
+}
+
+.danger-zone-text h3 {
+    font-family: var(--font-head);
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.danger-zone-text p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+@media (max-width: 768px) {
+    .card-edit-container {
+        padding: 20px 15px;
+    }
+
+    .card-edit-container h1 {
+        font-size: 2rem;
+    }
+
+    .card-edit-form {
+        padding: 30px 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-btn {
+        min-width: 100%;
+    }
+
+    .danger-zone-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-edit-container h1 {
+        font-size: 1.7rem;
+    }
+
+    .card-edit-form::before {
+        font-size: 0.65rem;
+        padding: 10px 15px;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+    }
+
+    .form-actions {
+        gap: 10px;
+    }
+
+}

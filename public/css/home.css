@@ -1,0 +1,178 @@
+/* ============================================================
+   REDLINE RIVALS — home.css
+   Auto-extrait de app.css — Chargement conditionnel par page
+   ============================================================ */
+
+/* ====================================
+   6. GRILLE DE FEATURES
+   ==================================== */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-box {
+    background: var(--glass);
+    border: 1px solid var(--border-glass);
+    padding: 30px;
+    text-align: center;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.feature-box:hover {
+    border-color: var(--primary);
+    background: rgba(255, 0, 60, 0.05);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--accent);
+}
+
+/* ====================================
+   7. GRILLE DE CARTES
+   ==================================== */
+.card-grid {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 40px 20px;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(255,255,255,0.03) 3px,
+            rgba(255,255,255,0.03) 6px
+        ),
+        linear-gradient(180deg, #050505 0%, #0a0a0a 50%, #050505 100%);
+    position: relative;
+}
+
+.card-item {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    width: 280px;
+    overflow: hidden;
+    position: relative;
+    transition: 0.4s;
+    backdrop-filter: blur(10px);
+}
+
+.card-item:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+}
+
+.card-image-container {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- Remplacer le bloc existant --- */
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Un peu plus épais pour l'effet glitch */
+    height: 3px; 
+    /* Utilisation d'un dégradé plutôt qu'une couleur unie pour un aspect plus "énergie" */
+    background: linear-gradient(90deg, transparent 0%, var(--primary) 20%, var(--primary) 80%, transparent 100%);
+    /* Glow plus intense et irrégulier */
+    box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 5px rgb(255, 255, 255);
+    /* Nouvelle animation : plus rapide (1.5s) et avec une courbe de vitesse saccadée */
+    animation: scan-glitch 1.5s cubic-bezier(0.1, 0.9, 0.2, 1) infinite;
+    opacity: 0;
+    z-index: 10;
+    /* Optimisation pour éviter le flou pendant le mouvement */
+    will-change: transform, opacity;
+}
+
+.card-item:hover .scanner-line {
+    opacity: 1;
+}
+
+.card-details {
+    padding: 20px;
+}
+
+.card-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.rarity-legendary {
+    color: var(--gold);
+    text-shadow: 0 0 5px var(--gold);
+}
+
+.rarity-epic {
+    color: #a300ff;
+}
+
+.rarity-rare {
+    color: var(--accent);
+}
+
+.rarity-mythic {
+    /* Un rose/violet très vif */
+    --mythic-color: #ff0077; 
+    color: var(--mythic-color);
+    /* Ajout d'une petite animation de pulsation subtile */
+}
+
+/* ====================================
+   8. FOOTER
+   ==================================== */
+footer {
+    background: 
+        linear-gradient(180deg, rgba(255,0,60,0.05) 0%, #020202 30%, #020202 100%),
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 100px,
+            rgba(0,243,255,0.03) 100px,
+            rgba(0,243,255,0.03) 101px
+        );
+    padding: 40px;
+    text-align: center;
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 -5px 20px rgba(255,0,60,0.1);
+    margin-top: 50px;
+    position: relative;
+}
+
+footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--accent) 30%, 
+        var(--primary) 50%, 
+        var(--accent) 70%, 
+        transparent 100%
+    );
+    animation: footerGlow 3s ease-in-out infinite;
+}

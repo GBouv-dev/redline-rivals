@@ -1,0 +1,368 @@
+/* ============================================================
+   REDLINE RIVALS — navbar.css
+   Auto-extrait de app.css — Chargement conditionnel par page
+   ============================================================ */
+
+
+/* ====================================
+   9. NAVIGATION
+   ==================================== */
+.cyber-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    height: 80px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-style: italic;
+    color: var(--primary);
+    text-decoration: none;
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-logo i {
+    transform: skew(-10deg);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-item {
+    font-family: var(--font-head);
+    font-weight: 700;
+    color: #aaa;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--accent);
+    transition: 0.3s;
+}
+
+.nav-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-item:hover::after {
+    width: 100%;
+}
+
+.item-gold {
+    color: var(--gold);
+}
+
+.item-gold:hover {
+    text-shadow: 0 0 10px var(--gold);
+}
+
+.item-danger {
+    color: var(--primary);
+}
+
+.item-danger:hover {
+    text-shadow: 0 0 10px var(--primary);
+}
+
+.item-purple {
+    color: var(--purple);
+}
+
+.item-purple:hover {
+    text-shadow: 0 0 10px var(--purple);
+}
+
+.nav-separator {
+    width: 1px;
+    height: 25px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 15px;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-panel {
+    text-align: right;
+    line-height: 1.2;
+}
+
+.user-rank {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.user-name {
+    display: block;
+    font-family: var(--font-head);
+    font-weight: bold;
+    color: white;
+}
+
+.btn-logout {
+    color: #555;
+    font-size: 1.2rem;
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.nav-auth-link {
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+.nav-btn-register {
+    background: var(--primary);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 2px;
+    font-weight: bold;
+    text-transform: uppercase;
+    clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.nav-btn-register:hover {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* ====================================
+   10. SYSTÈME DE CRÉDITS (NAVBAR)
+   ==================================== */
+.credits-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, rgba(255, 0, 60, 0.2), rgba(0, 243, 255, 0.2));
+    border: 2px solid var(--accent);
+    border-radius: 25px;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    animation: pulse-credits 3s ease-in-out infinite;
+    transition: transform 0.3s;
+}
+
+.credits-badge:hover {
+    transform: scale(1.05);
+}
+
+.credits-badge i {
+    color: var(--accent);
+    font-size: 1.2rem;
+    animation: coin-spin 2s ease-in-out infinite;
+}
+
+.credits-amount {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px var(--accent);
+    font-family: var(--font-head);
+}
+
+.credits-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 0, 60, 0.3);
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+}
+
+.user-dropdown-btn:hover {
+    background: rgba(255, 0, 60, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.user-dropdown-btn i {
+    transition: transform 0.3s;
+}
+
+.user-dropdown-btn:hover i {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: rgba(10, 10, 20, 0.98);
+    backdrop-filter: blur(12px);
+    border: 2px solid var(--primary);
+    border-radius: 8px;
+    min-width: 220px;
+    padding: 10px 0;
+    display: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 0, 60, 0.3);
+    z-index: 1001;
+    animation: slideDownFade 0.3s ease;
+}
+
+.dropdown-menu.active {
+    display: block;
+}
+
+.dropdown-menu::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid var(--primary);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #ccc;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--accent);
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 0, 60, 0.1);
+    color: white;
+    padding-left: 25px;
+}
+
+.dropdown-item.item-danger:hover {
+    background: rgba(255, 0, 60, 0.2);
+    color: var(--primary);
+}
+
+.dropdown-item.item-danger i {
+    color: var(--primary);
+}
+
+.dropdown-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 0, 60, 0.3);
+    margin: 5px 10px;
+}
+
+
+@media (max-width: 768px) {
+    .cyber-nav {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 15px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .nav-separator {
+        display: none;
+    }
+
+    .credits-badge {
+        padding: 6px 15px;
+    }
+
+    .credits-amount {
+        font-size: 1.1rem;
+    }
+
+    .user-dropdown-btn {
+        padding: 6px 12px;
+    }
+
+    .user-panel .user-rank {
+        font-size: 0.6rem;
+    }
+
+    .user-panel .user-name {
+        font-size: 0.9rem;
+    }
+
+    .dropdown-menu {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .dropdown-menu::before {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}

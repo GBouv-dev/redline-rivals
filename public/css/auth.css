@@ -1,0 +1,372 @@
+/* ============================================================
+   REDLINE RIVALS — auth.css
+   Formulaires d'authentification (login, register)
+   ============================================================ */
+
+/* ====================================
+   11. FORMULAIRES D'AUTHENTIFICATION
+   ==================================== */
+.flex-center-screen {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.cyber-auth-card {
+    background: rgba(10, 10, 20, 0.9);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 0, 60, 0.5);
+    border-radius: 15px;
+    padding: 40px;
+    max-width: 450px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+    box-shadow: 
+        0 0 30px rgba(255, 0, 60, 0.3),
+        0 0 60px rgba(0, 243, 255, 0.2);
+    animation: card-glow 3s ease-in-out infinite;
+}
+
+.card-decoration {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--accent);
+}
+
+.card-decoration.top-left {
+    top: -2px;
+    left: -2px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.card-decoration.bottom-right {
+    bottom: -2px;
+    right: -2px;
+    border-left: none;
+    border-top: none;
+}
+
+.cyber-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.cyber-label {
+    font-family: var(--font-head);
+    font-weight: bold;
+    color: var(--accent);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.cyber-input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 12px 15px;
+    color: white;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    transition: all 0.3s;
+    outline: none;
+    position: relative;
+    z-index: 15;
+    cursor: text;
+}
+
+.cyber-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.cyber-input:focus {
+    border-color: var(--primary);
+    background: rgba(255, 0, 60, 0.05);
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.3);
+}
+
+.cyber-input:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.cyber-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    position: relative;
+    z-index: 15;
+}
+
+.cyber-label-check {
+    font-family: var(--font-body);
+    color: #ccc;
+    text-transform: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cyber-label-check:hover {
+    color: white;
+}
+
+.cyber-alert {
+    background: rgba(255, 0, 60, 0.1);
+    border: 2px solid var(--primary);
+    border-radius: 5px;
+    padding: 15px;
+    color: white;
+    margin-bottom: 20px;
+    animation: alert-pulse 1s ease-in-out;
+}
+
+.form-error {
+    color: var(--primary);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    min-height: 20px;
+}
+
+.form-error ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.form-error li {
+    margin-bottom: 5px;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 20;
+}
+
+.link-accent {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    z-index: 30;
+    display: inline-block;
+}
+
+.link-accent:hover {
+    color: white;
+    text-shadow: 0 0 10px var(--accent);
+}
+
+/* ====================================
+   12. BOUTONS
+   ==================================== */
+.btn-cyber {
+    font-family: var(--font-head);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 12px 30px;
+    border: 2px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 15;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-cyber::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--primary);
+    transition: left 0.3s;
+    z-index: -1;
+}
+
+.btn-cyber:hover::before {
+    left: 0;
+}
+
+.btn-cyber:hover {
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.5);
+    transform: translateY(-2px);
+}
+
+.btn-cyber.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #ff0066);
+    color: white;
+    border: none;
+}
+
+.btn-cyber.btn-primary::before {
+    display: none;
+}
+
+.btn-cyber.btn-primary:hover {
+    background: linear-gradient(135deg, #ff0066, var(--primary));
+    box-shadow: 0 0 30px rgba(255, 0, 60, 0.7);
+}
+
+.w-100 {
+    width: 100%;
+}
+
+/* ====================================
+   13. BONUS CRÉDITS (PAGE REGISTER)
+   ==================================== */
+.credits-bonus-banner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, rgba(255, 0, 60, 0.15), rgba(0, 243, 255, 0.15));
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    animation: bonus-glow 2s ease-in-out infinite;
+}
+
+.credits-bonus-banner > i {
+    font-size: 2rem;
+    color: var(--accent);
+    animation: gift-bounce 1s ease-in-out infinite;
+}
+
+.credits-bonus-banner > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.credits-bonus-banner strong {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.credits-bonus-banner span {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent);
+}
+
+.credits-bonus-banner span i {
+    color: var(--gold);
+}
+
+/* ====================================
+   14. RESPONSIVE
+   ==================================== */
+@media (max-width: 768px) {
+    .cyber-nav {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 15px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .nav-separator {
+        display: none;
+    }
+
+    .credits-badge {
+        padding: 6px 15px;
+    }
+
+    .credits-amount {
+        font-size: 1.1rem;
+    }
+
+    .user-dropdown-btn {
+        padding: 6px 12px;
+    }
+
+    .user-panel .user-rank {
+        font-size: 0.6rem;
+    }
+
+    .user-panel .user-name {
+        font-size: 0.9rem;
+    }
+
+    .dropdown-menu {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .dropdown-menu::before {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 500px) {
+    .cyber-auth-card {
+        padding: 30px 20px;
+    }
+
+    .cyber-input {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    .btn-cyber {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .glitch-title {
+        font-size: 2.5rem;
+    }
+
+    .hero {
+        height: 70vh;
+    }
+}

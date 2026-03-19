@@ -1,0 +1,1215 @@
+/* ============================================================
+   REDLINE RIVALS — shop.css
+   Auto-extrait de app.css — Chargement conditionnel par page
+   ============================================================ */
+
+/* ====================================
+   15. CARTES DE BOOSTER (BOUTIQUE) - V2 HUD STYLE
+   ==================================== */
+
+/* --- Configuration des couleurs par rareté --- */
+
+.booster-card {
+    --glow-color: var(--accent); /* Couleur par défaut */
+}
+
+.booster-card[data-rarity="Common"]    { --glow-color: #a0a0a0; }
+.booster-card[data-rarity="Rare"]      { --glow-color: var(--accent); }
+.booster-card[data-rarity="Epic"]      { --glow-color: #9400D3; }
+.booster-card[data-rarity="Legendary"] { --glow-color: var(--gold); }
+.booster-card[data-rarity="Mythic"]    { --glow-color: #ff0077; }
+
+/* --- Base de la carte --- */
+.booster-card {
+    background: linear-gradient(160deg, rgba(10, 10, 15, 0.95) 0%, rgba(5, 5, 5, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Forme Cyberpunk avec coins coupés */
+    clip-path: polygon(
+        20px 0, 100% 0, 
+        100% calc(100% - 20px), calc(100% - 20px) 100%, 
+        0 100%, 0 20px
+    );
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+/* Bordure lumineuse au survol basée sur la rareté */
+.booster-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    transition: border-color 0.4s;
+    pointer-events: none;
+    z-index: 2;
+    clip-path: polygon(
+        20px 0, 100% 0, 
+        100% calc(100% - 20px), calc(100% - 20px) 100%, 
+        0 100%, 0 20px
+    );
+}
+
+.booster-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.booster-card:hover::before {
+    border-color: var(--glow-color);
+    box-shadow: inset 0 0 20px rgba(var(--glow-color), 0.2);
+}
+
+/* Grille de boosters (Layout) */
+.booster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    padding: 40px 0;
+}
+
+/* ------------------------------------
+   Badge de Rareté (Tag Technique)
+   ------------------------------------ */
+.rarity-badge {
+    position: absolute;
+    top: 0;
+    right: 0; /* Déplacé à droite pour le style tech */
+    left: auto;
+    padding: 8px 25px 8px 15px;
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    border-left: 2px solid var(--glow-color);
+    border-bottom: 2px solid var(--glow-color);
+    color: var(--glow-color);
+    z-index: 10;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 15px 100%);
+    box-shadow: -5px 5px 15px rgba(0,0,0,0.5);
+}
+
+/* ------------------------------------
+   Zone En-tête (Ex-Zone Image)
+   ------------------------------------ */
+/* On retire la hauteur fixe et les fonds complexes pour supprimer l'aspect "cadre photo" */
+.booster-card > div:first-of-type {
+    position: relative;
+    height: auto;       /* Hauteur adaptative */
+    padding: 35px 20px 10px; /* Padding pour aérer le haut */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent; /* Fond transparent */
+    border-bottom: none;     /* Pas de ligne de séparation */
+}
+
+/* Suppression de la grille holographique de fond */
+.booster-card > div:first-of-type::after {
+    display: none;
+}
+
+/* Suppression de l'effet de vitre/brillance sur l'image */
+.booster-shine {
+    display: none;
+}
+
+/* L'icône devient un logo stylisé plus discret */
+.booster-card i.fa-box-open {
+    font-size: 3.5rem; /* Taille réduite (était 5rem) */
+    color: rgba(255, 255, 255, 0.1); /* Très sombre/discret par défaut */
+    text-shadow: none;
+    z-index: 2;
+    transition: all 0.4s ease;
+}
+
+/* Au survol, l'icône s'allume de la couleur de la rareté */
+.booster-card:hover i.fa-box-open {
+    color: var(--glow-color);
+    transform: scale(1.1) rotate(-10deg);
+    text-shadow: 0 0 25px var(--glow-color);
+    opacity: 1;
+}
+
+/* Ajustement du titre pour qu'il remonte un peu */
+.booster-card h3 {
+    margin-top: 5px; /* Réduit l'espace entre l'icône et le titre */
+}
+
+/* ------------------------------------
+   Informations & Stats (Data Block)
+   ------------------------------------ */
+.booster-card h3 {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    color: white;
+    margin: 15px 0 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.booster-card p {
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    min-height: 40px;
+}
+
+/* Conteneur des stats (HUD) */
+.booster-card > div:last-child > div:nth-child(3) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.1); /* Lignes de séparation */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+}
+
+.booster-card > div:last-child > div:nth-child(3) > div {
+    background: rgba(10, 10, 15, 0.8);
+    padding: 12px 5px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.booster-card > div:last-child > div:nth-child(3) i {
+    font-size: 1rem;
+    color: var(--glow-color);
+    margin-bottom: 2px;
+}
+
+.booster-card > div:last-child > div:nth-child(3) div {
+    font-family: var(--font-head);
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+/* ------------------------------------
+   Footer: Prix et Action
+   ------------------------------------ */
+.booster-card > div:last-child > div:last-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* Prix */
+.booster-card > div:last-child > div:last-child > div {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Bouton Achat Spécifique */
+.buy-booster-btn {
+    background: transparent;
+    border: 1px solid var(--glow-color);
+    color: var(--glow-color);
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+    transition: all 0.3s;
+}
+
+.buy-booster-btn::before {
+    display: none; /* Désactive l'effet par défaut du btn-cyber pour ce style spécifique */
+}
+
+.buy-booster-btn:hover:not([disabled]) {
+    background: var(--glow-color);
+    color: #000;
+    box-shadow: 0 0 20px var(--glow-color);
+    transform: translateY(-2px);
+}
+
+.buy-booster-btn[disabled] {
+    border-color: #444;
+    color: #666;
+    background: rgba(0,0,0,0.3);
+    cursor: not-allowed;
+}
+
+/* ====================================
+   BOUTONS D'ACTION SÉLECTION
+   ==================================== */
+.selection-actions {
+    display: flex;
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(0, 243, 255, 0.2);
+}
+
+.selection-btn {
+    flex: 1;
+    padding: 12px 25px;
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border: 2px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+.selection-btn-clear {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.selection-btn-clear:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 20px var(--primary);
+    transform: translateY(-2px);
+}
+
+.selection-btn-select-all {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.selection-btn-select-all:hover {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 0 20px var(--accent);
+    transform: translateY(-2px);
+}
+
+/* ====================================
+   BOUTONS D'ACTION PRINCIPAUX
+   ==================================== */
+.deck-form-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px dashed rgba(255, 215, 0, 0.2);
+}
+
+.deck-form-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 14px 30px;
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    text-align: center;
+    border: 2px solid;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+/* Bouton "Retour à la liste" */
+.btn-back-deck-list {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.btn-back-deck-list:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Bouton "Update/Save" */
+.btn-update-deck {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000;
+    font-weight: 800;
+}
+
+.btn-update-deck:hover {
+    background: transparent;
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.4),
+        inset 0 0 20px rgba(255, 215, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Bouton "Supprimer" */
+.btn-delete-deck-form {
+    background: transparent;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-delete-deck-form:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 25px var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Effet de lueur animée sur les boutons */
+.deck-form-btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.deck-form-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* État désactivé */
+.deck-form-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #444;
+    color: #666;
+}
+
+.deck-form-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* ====================================
+   ZONE DE DANGER (SUPPRESSION)
+   ==================================== */
+.deck-danger-zone {
+    margin-top: 50px;
+    padding: 25px;
+    background: rgba(255, 0, 60, 0.05);
+    border: 1px dashed var(--primary);
+    border-radius: 10px;
+    position: relative;
+}
+
+.deck-danger-zone::before {
+    content: "⚠ DANGER ZONE";
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    padding: 0 10px;
+    background: var(--bg-dark);
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+}
+
+.deck-danger-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.deck-danger-text {
+    flex: 1;
+}
+
+.deck-danger-text h3 {
+    font-family: var(--font-head);
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.deck-danger-text p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ====================================
+   RESPONSIVE DESIGN
+   ==================================== */
+@media (max-width: 768px) {
+    .deck-edit-container {
+        padding: 20px 15px;
+    }
+
+    .deck-edit-container h1 {
+        font-size: 2rem;
+    }
+
+    .deck-edit-form {
+        padding: 30px 20px;
+    }
+
+    .selection-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card-counter {
+        justify-content: space-between;
+    }
+
+    .selection-filters {
+        flex-direction: column;
+    }
+
+    .filter-input,
+    .filter-select {
+        min-width: 100%;
+    }
+
+    .selectable-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+    }
+
+    .deck-form-actions,
+    .selection-actions {
+        flex-direction: column;
+    }
+
+    .deck-form-btn,
+    .selection-btn {
+        min-width: 100%;
+    }
+
+    .deck-danger-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .deck-edit-container h1 {
+        font-size: 1.7rem;
+    }
+
+    .deck-edit-form::before,
+    .card-selection-section::before {
+        font-size: 0.65rem;
+        padding: 10px 15px;
+    }
+
+    .deck-form-group label {
+        font-size: 0.85rem;
+    }
+
+    .deck-form-control {
+        padding: 12px 15px;
+        font-size: 1rem;
+    }
+
+    .selection-title {
+        font-size: 1.2rem;
+    }
+
+    .selectable-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ====================================
+   ANIMATIONS D'APPARITION
+   ==================================== */
+.deck-form-group {
+    opacity: 0;
+    animation: slideInLeft 0.5s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Délai progressif pour chaque champ */
+.deck-form-group:nth-child(1) { animation-delay: 0.1s; }
+.deck-form-group:nth-child(2) { animation-delay: 0.15s; }
+.deck-form-group:nth-child(3) { animation-delay: 0.2s; }
+.deck-form-group:nth-child(4) { animation-delay: 0.25s; }
+.deck-form-group:nth-child(5) { animation-delay: 0.3s; }
+
+.deck-form-actions {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.4s forwards;
+}
+
+/* Animation des cartes sélectionnables */
+.selectable-card {
+    opacity: 0;
+    animation: fadeInCard 0.4s ease-out forwards;
+}
+
+@keyframes fadeInCard {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Délai progressif */
+.selectable-card:nth-child(1) { animation-delay: 0.05s; }
+.selectable-card:nth-child(2) { animation-delay: 0.1s; }
+.selectable-card:nth-child(3) { animation-delay: 0.15s; }
+.selectable-card:nth-child(4) { animation-delay: 0.2s; }
+.selectable-card:nth-child(5) { animation-delay: 0.25s; }
+.selectable-card:nth-child(6) { animation-delay: 0.3s; }
+.selectable-card:nth-child(7) { animation-delay: 0.35s; }
+.selectable-card:nth-child(8) { animation-delay: 0.4s; }
+.selectable-card:nth-child(n+9) { animation-delay: 0.45s; }
+
+/* ====================================
+   AMÉLIORATION UX - VALIDATION
+   ==================================== */
+.deck-form-control.is-valid {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.deck-form-control.is-invalid {
+    border-color: var(--primary);
+    background: rgba(255, 0, 60, 0.05);
+}
+
+.deck-form-control.is-valid:focus {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.deck-form-control.is-invalid:focus {
+    box-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
+}
+
+/* ============================================
+   REDLINE RIVALS - INVENTORY PAGE
+   Page d'inventaire et ouverture de boosters
+   ============================================ */
+
+/* ====================================
+   CONTENEUR PRINCIPAL
+   ==================================== */
+.inventory-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ====================================
+   INVENTAIRE VIDE
+   ==================================== */
+.empty-inventory {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--accent);
+    padding: 60px 40px;
+    border-radius: 15px;
+    text-align: center;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.empty-inventory-icon {
+    font-size: 5rem;
+    color: var(--accent);
+    margin-bottom: 20px;
+    opacity: 0.5;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.empty-inventory h2 {
+    color: var(--accent);
+    margin-bottom: 15px;
+    font-family: var(--font-head);
+}
+
+.empty-inventory p {
+    color: #aaa;
+    margin-bottom: 30px;
+}
+
+/* ====================================
+   GRILLE DE BOOSTERS
+   ==================================== */
+.boosters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+/* ====================================
+   CARTE BOOSTER
+   ==================================== */
+.booster-card {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    animation: fadeInCard 0.5s ease-out backwards;
+}
+
+.booster-card:nth-child(1) { animation-delay: 0.1s; }
+.booster-card:nth-child(2) { animation-delay: 0.2s; }
+.booster-card:nth-child(3) { animation-delay: 0.3s; }
+.booster-card:nth-child(4) { animation-delay: 0.4s; }
+.booster-card:nth-child(5) { animation-delay: 0.5s; }
+.booster-card:nth-child(6) { animation-delay: 0.6s; }
+
+.booster-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 50px rgba(0, 243, 255, 0.4);
+}
+
+/* Badge quantité */
+.quantity-badge {
+    position: absolute !important;
+    top: 15px !important;
+    left: 15px !important;
+    background: #ffd700 !important;
+    color: rgb(0, 0, 0) !important;
+    padding: 5px 12px !important;       /* ← Retour à l'original (au lieu de 8px 15px) */
+    border-radius: 50% !important;
+    font-weight: bold !important;
+    font-size: 1.1rem !important;          /* ← Retour à l'original (au lieu de 1.3rem) */
+    z-index: 2 !important;              /* ← Retour à l'original (au lieu de 10) */
+    min-width: 40px !important;         /* ← Retour à l'original (au lieu de 45px) */
+    text-align: center !important;
+}
+
+/* Image du booster */
+.booster-image {
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.booster-pack-img {
+    max-height: 200px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.booster-pack-icon {
+    font-size: 6rem;
+    color: var(--booster-color);
+    opacity: 0.7;
+    transition: transform 0.3s ease;
+}
+
+.booster-card:hover .booster-pack-img,
+.booster-card:hover .booster-pack-icon {
+    transform: scale(1.15) rotate(10deg);
+}
+
+/* Effet pulse */
+.booster-pulse {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, var(--booster-color) 0%, transparent 70%);
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Infos booster */
+.booster-info {
+    padding: 20px;
+}
+
+.booster-name {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-family: var(--font-head);
+    letter-spacing: 2px;
+}
+
+.booster-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: rgba(0, 243, 255, 0.05);
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.booster-stats > div {
+    color: #aaa;
+}
+
+.booster-stats .legendary-chance {
+    color: var(--gold);
+}
+
+.open-booster-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ====================================
+   BOUTONS NAVIGATION
+   ==================================== */
+.nav-buttons {
+    text-align: center;
+    margin-top: 50px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ====================================
+   MODAL
+   ==================================== */
+.booster-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.booster-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    text-align: center;
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Animation ouverture */
+.opening-animation {
+    display: none;
+}
+
+.booster-opening {
+    font-size: 8rem;
+    color: var(--accent);
+    animation: boosterOpen 1.5s ease-out;
+}
+
+.opening-text {
+    color: var(--accent);
+    font-size: 2rem;
+    margin-top: 20px;
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    animation: fadeIn 0.5s ease-in 0.5s both;
+    text-shadow: 0 0 20px var(--accent);
+}
+
+/* Révélation cartes */
+.cards-reveal {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+.reveal-title {
+    color: var(--accent);
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    animation: fadeIn 0.5s ease-in;
+    text-shadow: 0 0 30px var(--accent);
+    flex-shrink: 0;
+}
+
+/* Conteneur de cartes avec scroll */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+    max-height: calc(90vh - 250px);
+    flex: 1;
+}
+
+/* Scrollbar stylée */
+.cards-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.cards-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 5px;
+}
+
+.cards-container::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* Carte révélée */
+.card-reveal {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 20px;
+    animation: cardReveal 0.6s ease-out backwards;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-reveal:hover {
+    transform: translateY(-8px) scale(1.03);
+}
+
+/* Badge NEW */
+.new-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--gold);
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    font-family: var(--font-head);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+    z-index: 10;
+}
+
+/* Image carte */
+.card-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-placeholder {
+    width: 100%;
+    height: 250px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-placeholder i {
+    font-size: 5rem;
+    opacity: 0.5;
+}
+
+/* Nom carte */
+.card-name {
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    font-family: var(--font-head);
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px currentColor;
+    flex-shrink: 0;
+}
+
+/* Stats carte */
+.card-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    font-size: 1rem;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.card-stats > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-stat-brand {
+    color: #aaa;
+}
+
+.card-stat-hp {
+    color: var(--accent);
+    font-weight: bold;
+    font-family: var(--font-head);
+}
+
+/* Rareté */
+.card-rarity {
+    margin-top: auto;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-family: var(--font-head);
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Couleurs par rareté */
+.card-reveal[data-rarity="common"] {
+    border-color: #a0a0a0;
+}
+
+.card-reveal[data-rarity="rare"] {
+    border-color: #00f3ff;
+    box-shadow: 0 0 25px rgba(0, 243, 255, 0.4);
+}
+
+.card-reveal[data-rarity="epic"] {
+    border-color: #9400D3;
+    box-shadow: 0 0 25px rgba(148, 0, 211, 0.4);
+}
+
+.card-reveal[data-rarity="legendary"] {
+    border-color: #ffd700;
+    box-shadow: 0 0 35px rgba(255, 215, 0, 0.6);
+    animation: cardReveal 0.6s ease-out backwards, goldenGlow 2s ease-in-out infinite;
+}
+
+.card-reveal[data-rarity="mythic"] {
+    border-color: #ff0077;
+    box-shadow: 0 0 35px rgba(255, 0, 119, 0.6);
+    animation: cardReveal 0.6s ease-out backwards, mythicGlow 1.5s ease-in-out infinite;
+}
+
+/* Bouton fermer */
+.close-modal-btn {
+    font-size: 1.2rem;
+    padding: 15px 40px;
+    flex-shrink: 0;
+}
+
+/* ====================================
+   ANIMATIONS
+   ==================================== */
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.95); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+@keyframes boosterOpen {
+    0% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.5) rotate(180deg);
+        opacity: 0.5;
+    }
+    100% { 
+        transform: scale(2) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInCard {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardReveal {
+    from { 
+        opacity: 0;
+        transform: translateY(50px) rotateY(180deg);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) rotateY(0deg);
+    }
+}
+
+@keyframes goldenGlow {
+    0%, 100% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.6); }
+    50% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.9); }
+}
+
+@keyframes mythicGlow {
+    0%, 100% { box-shadow: 0 0 35px rgba(255, 0, 119, 0.6); }
+    50% { box-shadow: 0 0 50px rgba(255, 0, 119, 0.9); }
+}
+
+/* ====================================
+   RESPONSIVE
+   ==================================== */
+@media (max-width: 1200px) {
+    .cards-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-container {
+        padding: 30px 15px;
+    }
+    
+    .boosters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .booster-image {
+        height: 200px;
+    }
+    
+    .booster-pack-img {
+        max-height: 150px;
+    }
+    
+    .booster-pack-icon {
+        font-size: 4rem;
+    }
+    
+    .reveal-title {
+        font-size: 1.8rem;
+    }
+    
+    .cards-container {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+        max-height: calc(90vh - 220px);
+    }
+    
+    .card-image,
+    .card-placeholder {
+        height: 200px;
+    }
+    
+    .booster-opening {
+        font-size: 5rem;
+    }
+    
+    .opening-text {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .boosters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cards-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .empty-inventory {
+        padding: 40px 20px;
+    }
+    
+    .empty-inventory-icon {
+        font-size: 3.5rem;
+    }
+    
+    .nav-buttons {
+        flex-direction: column;
+    }
+    
+    .nav-buttons .btn-cyber {
+        width: 100%;
+    }
+}
