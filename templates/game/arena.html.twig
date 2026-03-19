@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Arène de Combat - Redline Rivals{% endblock %}
+
+{% block body %}
+
+<section class="hero" style="height: 40vh;">
+    <h1 class="glitch-title">ARÈNE DE COMBAT</h1>
+    <p style="font-size: 1.1rem; letter-spacing: 3px; color: #ccc;">SÉLECTIONNEZ VOTRE DECK ET ENTREZ DANS L'ARÈNE</p>
+</section>
+
+<section class="section-bg-scan">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+        {# ── Mes combats actifs ── #}
+        {% if activeBattles is not empty %}
+        <div style="margin-bottom: 50px;">
+            <h2 style="color: var(--accent); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;">
+                <i class="fa-solid fa-bolt"></i> MES COMBATS EN COURS
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                {% for battle in activeBattles %}
+                <div style="background: rgba(0,255,200,0.05); border: 1px solid var(--accent); padding: 20px; border-radius: 10px;">
+                    <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 10px;">
+                        <i class="fa-solid fa-hashtag"></i> Combat #{{ battle.id }}
+                        <span style="float:right; color: {% if battle.status == 'waiting' %}var(--primary){% else %}var(--accent){% endif %};">
+                            {% if battle.status == 'waiting' %}EN ATTENTE{% else %}ACTIF{% endif %}
+                        </span>
+                    </p>
+                    <p style="color: #ccc; margin-bottom: 15px;">
+                        vs
+                        {% if battle.player2 %}
+                            {{ battle.player2.email }}
+                        {% else %}
+                            <em style="color: #666;">En attente d'un adversaire...</em>
+                        {% endif %}
+                    </p>
+                    <a href="{{ path('app_game_arena_battle', {id: battle.id}) }}" class="btn-cyber" style="display:block; text-align:center; font-size:0.85rem; padding: 10px 20px;">
+                        <i class="fa-solid fa-play"></i> REPRENDRE
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+
+            {# ── Créer un combat ── #}
+            <div>
+                <h2 style="color: var(--primary); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-plus"></i> CRÉER UN COMBAT
+                </h2>
+                <div style="background: rgba(255,0,60,0.05); border: 2px solid var(--primary); padding: 30px; border-radius: 12px;">
+                    {% if userDecks is empty %}
+                        <p style="color: #aaa; text-align: center;">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: var(--primary); display:block; font-size:2rem; margin-bottom:10px;"></i>
+                            Vous n'avez aucun deck.<br>
+                            <a href="{{ path('app_deck_index') }}" style="color: var(--accent);">Créez un deck</a> pour combattre.
+                        </p>
+                    {% else %}
+                        <label style="color: #ccc; font-size: 0.9rem; display:block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                            Choisir votre deck
+                        </label>
+                        <select id="createDeckSelect" style="width:100%; padding:12px; background:#111; border:1px solid var(--primary); color:white; border-radius:8px; margin-bottom:20px; font-size:0.95rem;">
+                            {% for deck in userDecks %}
+                                <option value="{{ deck.id }}">{{ deck.name }} ({{ deck.cards|length }} cartes)</option>
+                            {% endfor %}
+                        </select>
+                        <button onclick="createBattle()" class="btn-cyber" style="width:100%; font-size:1rem; padding:14px;">
+                            <i class="fa-solid fa-crosshairs"></i> LANCER LE MATCHMAKING
+                        </button>
+                        <p style="color: #555; font-size: 0.8rem; text-align:center; margin-top:12px;">
+                            Un lien de combat sera généré — partagez-le à votre adversaire
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ── Rejoindre un combat ── #}
+            <div>
+                <h2 style="color: var(--accent); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;">
+                    <i class="fa-solid fa-users"></i> COMBATS DISPONIBLES
+                </h2>
+                {% if waitingBattles is empty %}
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 30px; border-radius: 12px; text-align: center; color: #666;">
+                        <i class="fa-solid fa-satellite-dish" style="font-size: 2rem; margin-bottom: 10px; display:block;"></i>
+                        Aucun adversaire en attente.<br>
+                        <span style="font-size: 0.85rem;">Créez un combat et invitez quelqu'un.</span>
+                    </div>
+                {% else %}
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        {% for battle in waitingBattles %}
+                        <div style="background: rgba(0,255,200,0.04); border: 1px solid #333; padding: 18px 20px; border-radius: 10px; display:flex; align-items:center; gap:15px;">
+                            <div style="flex:1;">
+                                <p style="color: #ccc; margin:0 0 4px;">
+                                    <strong style="color:white;">{{ battle.player1.email }}</strong>
+                                </p>
+                                <p style="color: #555; font-size: 0.8rem; margin:0;">
+                                    <i class="fa-solid fa-clock"></i> {{ battle.createdAt|date('H:i') }}
+                                </p>
+                            </div>
+                            <button onclick="joinBattle({{ battle.id }})" class="btn-cyber" style="font-size:0.8rem; padding:8px 16px; white-space:nowrap;">
+                                <i class="fa-solid fa-bolt"></i> REJOINDRE
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+{# ── Modal choix deck pour rejoindre ── #}
+<div id="joinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0d0d0d; border:2px solid var(--accent); padding:40px; border-radius:15px; width:400px; max-width:90vw;">
+        <h3 style="color:var(--accent); text-transform:uppercase; margin-bottom:20px;">Choisir votre deck</h3>
+        <select id="joinDeckSelect" style="width:100%; padding:12px; background:#111; border:1px solid var(--accent); color:white; border-radius:8px; margin-bottom:20px;">
+            {% for deck in userDecks %}
+                <option value="{{ deck.id }}">{{ deck.name }} ({{ deck.cards|length }} cartes)</option>
+            {% endfor %}
+        </select>
+        <div style="display:flex; gap:10px;">
+            <button onclick="confirmJoin()" class="btn-cyber" style="flex:1;">
+                <i class="fa-solid fa-bolt"></i> REJOINDRE
+            </button>
+            <button onclick="closeJoinModal()" style="flex:1; padding:12px; background:transparent; border:1px solid #444; color:#aaa; cursor:pointer; border-radius:8px;">
+                Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let pendingBattleId = null;
+
+async function createBattle() {
+    const deckId = document.getElementById('createDeckSelect').value;
+    const res  = await fetch('{{ path("app_game_arena_create") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `deck_id=${deckId}`,
+    });
+    const data = await res.json();
+    if (data.success) {
+        window.location.href = `/game/arena/${data.battleId}`;
+    } else {
+        alert('Erreur : ' + data.message);
+    }
+}
+
+function joinBattle(id) {
+    pendingBattleId = id;
+    const modal = document.getElementById('joinModal');
+    modal.style.display = 'flex';
+}
+
+function closeJoinModal() {
+    document.getElementById('joinModal').style.display = 'none';
+    pendingBattleId = null;
+}
+
+async function confirmJoin() {
+    const deckId = document.getElementById('joinDeckSelect').value;
+    const res  = await fetch(`/game/arena/${pendingBattleId}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `deck_id=${deckId}`,
+    });
+    const data = await res.json();
+    if (data.success) {
+        window.location.href = `/game/arena/${data.battleId}`;
+    } else {
+        alert('Erreur : ' + data.message);
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,158 @@
+<nav
+	class="cyber-nav">
+	{# 1. Logo (Directement enfant de cyber-nav pour le space-between) #}
+	<a href="{{ path('app_home') }}" class="nav-logo">
+		<i class="fa-solid fa-gauge-high"></i>
+		<span class="logo-text">REDLINE RIVALS</span>
+	</a>
+
+	{# 2. Groupe de liens de navigation #}
+	{# Utilisation de 'nav-links' au lieu de 'navbar-menu' pour matcher le CSS flex #}
+	<div class="nav-links" id="navbarMenu">
+
+		{% if is_granted('ROLE_USER') %}
+			{# --- SECTION UTILISATEUR CONNECTÉ --- #}
+
+			{# Badge Crédits #}
+				<div class="credits-badge"> <i class="fa-solid fa-coins"></i>
+				<span class="credits-amount">{{ app.user.credits|number_format(0, ',', ' ') }}</span>
+				<span class="credits-label">CR</span>
+			</div>
+
+			{# Séparateur visuel #}
+			<div class="nav-separator"></div>
+
+			{# Liens de navigation (nav-item au lieu de nav-link) #}
+			<a href="{{ path('app_deck_index') }}" class="nav-item">
+				<i class="fa-solid fa-warehouse"></i>
+				Garage
+			</a>
+			<a href="{{ path('app_card_index') }}" class="nav-item">
+				<i class="fa-solid fa-car"></i>
+				Cartes
+			</a>
+			{# Item Shop en Gold pour le faire ressortir #}
+			<a href="{{ path('app_game_shop') }}" class="nav-item item-gold">
+				<i class="fa-solid fa-box-open"></i>
+				Container
+			</a>
+			<a href="{{ path('app_game_arena') }}" class="nav-item item-danger">
+				<i class="fa-solid fa-rocket"></i>
+				Arena
+			</a>
+			<a href="{{ path('app_game_market') }}" class="nav-item item-purple">
+				<i class="fa-solid fa-shop"></i>
+				Market
+			</a>
+			{# Ajouter cette ligne : #}
+			<a href="{{ path('app_game_auctions') }}" class="nav-item item-gold">
+				<i class="fa-solid fa-gavel"></i>
+				Enchères
+			</a>
+
+			{# Dropdown Utilisateur #}
+			<div
+				class="user-dropdown" id="userDropdownContainer">
+				{# Bouton déclencheur stylisé #}
+				<button class="user-dropdown-btn" id="userMenuBtn">
+					<i class="fa-solid fa-user-ninja"></i>
+					<span>{{ app.user.email|split('@')[0] }}</span>
+					<i class="fa-solid fa-chevron-down"></i>
+				</button>
+
+				{# Menu déroulant #}
+				<div class="dropdown-menu" id="userDropdown">
+					<a href="{{ path('app_profile') }}" class="dropdown-item">
+						<i class="fa-solid fa-user-ninja"></i>
+						Mon profil
+					</a>
+					{# <a href="{{ path('app_settings') }}" class="dropdown-item">
+										                        <i class="fa-solid fa-gear"></i> Paramètres
+										                    </a> #}
+					{# <div class="dropdown-divider"></div> #}
+
+					<a href="{{ path('app_logout') }}" class="dropdown-item item-danger">
+						<i class="fa-solid fa-right-from-bracket"></i>
+						Déconnexion
+					</a>
+				</div>
+			</div>
+
+		{% else %}
+			{# --- SECTION VISITEUR --- #}
+
+			<a href="{{ path('app_login') }}" class="nav-auth-link">
+				<i class="fa-solid fa-right-to-bracket"></i>
+				CONNEXION
+			</a>
+
+			{# Bouton spécial polygone pour l'inscription #}
+			<a href="{{ path('app_register') }}" class="nav-btn-register">
+				<i class="fa-solid fa-flag-checkered"></i>
+				S'inscrire
+			</a>
+
+		{% endif %}
+	</div>
+
+	{# 3. Burger Menu (Optionnel si vous n'avez pas le CSS spécifique, je garde la structure) #}
+	<button class="navbar-burger" id="navbarBurger" style="background:none; border:none; cursor:pointer;">
+		<span style="display:block; width:25px; height:3px; background:white; margin:5px 0;"></span>
+		<span style="display:block; width:25px; height:3px; background:white; margin:5px 0;"></span>
+		<span style="display:block; width:25px; height:3px; background:white; margin:5px 0;"></span>
+	</button>
+</nav>
+
+<script>
+	// Gestion du Dropdown Utilisateur
+const userMenuBtn = document.getElementById('userMenuBtn');
+const userDropdown = document.getElementById('userDropdown');
+
+if (userMenuBtn && userDropdown) {
+userMenuBtn.addEventListener('click', function (e) {
+e.stopPropagation(); // Empêche la fermeture immédiate
+userDropdown.classList.toggle('active');
+
+// Rotation de la flèche
+const icon = this.querySelector('.fa-chevron-down');
+if (icon) {
+icon.style.transform = userDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+});
+
+// Fermer le menu si on clique ailleurs
+document.addEventListener('click', function (e) {
+if (! userDropdown.contains(e.target) && ! userMenuBtn.contains(e.target)) {
+userDropdown.classList.remove('active');
+const icon = userMenuBtn.querySelector('.fa-chevron-down');
+if (icon) 
+icon.style.transform = 'rotate(0deg)';
+
+
+}
+});
+}
+
+// Gestion du Menu Mobile
+const navbarBurger = document.getElementById('navbarBurger');
+const navbarMenu = document.getElementById('navbarMenu');
+
+if (navbarBurger && navbarMenu) {
+navbarBurger.addEventListener('click', function () { // Bascule l'affichage flex/none ou ajoute une classe css pour le mobile
+if (navbarMenu.style.display === 'flex') {
+navbarMenu.style.display = '';
+// Remettre style desktop si nécessaire
+} else {
+navbarMenu.style.display = 'flex';
+navbarMenu.style.flexDirection = 'column';
+navbarMenu.style.position = 'absolute';
+navbarMenu.style.top = '80px';
+navbarMenu.style.left = '0';
+navbarMenu.style.width = '100%';
+navbarMenu.style.background = 'rgba(10, 10, 10, 0.95)';
+navbarMenu.style.padding = '20px';
+navbarMenu.style.zIndex = '999';
+}
+});
+}
+</script>

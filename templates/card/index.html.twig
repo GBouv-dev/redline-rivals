@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}GARAGE // DATABASE{% endblock %}
+
+{% block page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/cardTable.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="hero" style="height: 35vh;">
+    <h1 class="glitch-title">GARAGE INDEX</h1>
+    <p style="letter-spacing: 3px; color: #ccc; font-size: 1rem;">SYSTEM // DATA_ACCESS</p>
+</section>
+
+<section class="section-bg-grid" style="min-height: 60vh; padding: 60px 20px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+
+        {# Header #}
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; flex-wrap:wrap; gap:15px;">
+            <p style="color:#333; font-size:.8rem; letter-spacing:2px; font-family:monospace; margin:0;">
+                {{ cards|length }} ASSETS FOUND
+            </p>
+            {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_card_new') }}" class="btn-cyber btn-primary">
+                <i class="fa-solid fa-plus"></i> NEW ASSET
+            </a>
+            {% endif %}
+        </div>
+
+        {% if cards is empty %}
+        <div style="text-align:center; padding:80px 20px; color:#333;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:3rem; margin-bottom:20px; display:block;"></i>
+            SYSTEM ERROR: NO DATA FOUND
+        </div>
+        {% else %}
+        <div class="cards-tcg-grid">
+            {% for card in cards %}
+            {% set rarityColor = {
+            'legendary': '#ffd700',
+            'mythic': '#ff0077',
+            'epic': '#c353ff',
+            'rare': '#00f3ff',
+            'uncommon': '#4CAF50',
+            'common': '#9e9e9e'
+            } %}
+            {% set color = rarityColor[card.rarity|lower] ?? '#9e9e9e' %}
+
+            <div class="tcg-card" style="--rc: {{ color }};">
+                <a href="{{ path('app_card_show', {id: card.id}) }}" class="tcg-card-link">
+
+                    {# Image #}
+                    <div class="tcg-img-wrap">
+                        {% if card.imagePath %}
+                        <img src="{{ asset('images/' ~ card.imagePath) }}" alt="{{ card.name }}">
+                        {% else %}
+                        <div class="tcg-img-placeholder">
+                            <i class="fa-solid fa-car-side"></i>
+                        </div>
+                        {% endif %}
+                        <div class="tcg-img-overlay"></div>
+                        <div class="tcg-scanline"></div>
+
+                        {# Badge rareté #}
+                        <span class="tcg-rarity">{{ card.rarity }}</span>
+
+                        {# Shine pour legendaries #}
+                        {% if card.rarity|lower in ['legendary', 'mythic'] %}
+                        <div class="tcg-shine"></div>
+                        {% endif %}
+                    </div>
+
+                    {# Infos #}
+                    <div class="tcg-info">
+                        <p class="tcg-name">{{ card.name }}</p>
+                        <p class="tcg-brand">{{ card.brand }}</p>
+                        <div class="tcg-divider"></div>
+                        <div class="tcg-stats">
+                            <div class="tcg-stat">
+                                <span class="tcg-stat-label">CH</span>
+                                <span class="tcg-stat-value">{{ card.horsepower }}</span>
+                            </div>
+                            <div class="tcg-stat">
+                                <span class="tcg-stat-label">ID</span>
+                                <span class="tcg-stat-value" style="font-size:.7rem;">#{{ card.id }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </a>
+
+                {# Boutons d'actions #}
+                <td class="text-end">
+                    <div class="btn-group">
+                        <a href="{{ path('app_card_show', {'id': card.id}) }}" class="btn-icon" title="SCAN">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_card_edit', {'id': card.id}) }}" class="btn-icon alert" title="MODIFY">
+                            <i class="fas fa-wrench"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div style="text-align:center; margin-top:50px;">
+            <span style="font-family:monospace; font-size:.75rem; color:#1a1a1a; letter-spacing:3px;">
+                END OF STREAM // 0010110
+            </span>
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

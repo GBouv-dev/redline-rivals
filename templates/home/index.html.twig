@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Redline Rivals - Le TCG Automobile{% endblock %}
+
+{% block page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <div class="hero">
+        <h1 class="glitch-title">REDLINE RIVALS</h1>
+        <p style="font-size: 1.5rem; letter-spacing: 5px; margin-bottom: 40px; color: #ccc;">
+            COLLECTIONNEZ. MODIFIEZ. DOMINEZ.
+        </p>
+
+        <div class="hero-actions">
+            {% if is_granted('ROLE_USER') %}
+                <a href="{{ path('app_deck_index') }}" class="btn-cyber">
+                    <i class="fa-solid fa-warehouse"></i> MON GARAGE
+                </a>
+                <a href="{{ path('app_game_shop') }}" class="btn-cyber btn-primary">
+                    <i class="fa-solid fa-box-open"></i> BOOSTERS
+                </a>
+            {% else %}
+                <a href="{{ path('app_register') }}" class="btn-cyber btn-primary">
+                    <i class="fa-solid fa-flag-checkered"></i> COMMENCER LA COURSE
+                </a>
+                <a href="{{ path('app_login') }}" class="btn-cyber">
+                    <i class="fa-solid fa-key"></i> CONNEXION
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <section class="section-bg-glow">
+        <h2 class="section-title">COMMENT JOUER</h2>
+        
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="feature-icon"><i class="fa-solid fa-coins"></i></div>
+                <h3>1. Gagnez des Crédits</h3>
+                <p>Débloquez des crédits en vous inscrivant, gagnez des courses et participez aux événements pour remplir votre portefeuille.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h3>2. Construisez</h3>
+                <p>Dépensez vos crédits pour ouvrir des boosters, collectionnez des bolides légendaires et assemblez le Deck ultime de 5 cartes.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <h3>3. Optimisez</h3>
+                <p>Chaque voiture a ses stats : Chevaux, Maniabilité, Accélération. Choisissez la bonne stratégie.</p>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-icon"><i class="fa-solid fa-trophy"></i></div>
+                <h3>4. Dominez</h3>
+                <p>Affrontez d'autres joueurs dans l'Arène. Le gagnant remporte des crédits et de la gloire.</p>
+            </div>
+        </div>
+
+        {% if not is_granted('ROLE_USER') %}
+            <div style="text-align: center; margin-top: 40px; padding: 30px; background: linear-gradient(135deg, rgba(255, 0, 85, 0.1), rgba(0, 255, 255, 0.1)); border: 1px solid var(--primary); border-radius: 15px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <i class="fa-solid fa-gift" style="font-size: 3rem; color: var(--accent); margin-bottom: 15px;"></i>
+                <h3 style="color: white; margin-bottom: 10px;">BONUS D'INSCRIPTION</h3>
+                <p style="color: #aaa; margin-bottom: 20px;">Créez votre compte et recevez immédiatement</p>
+                <div style="font-size: 2.5rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 20px var(--accent);">
+                    1000 <i class="fa-solid fa-coins"></i> CRÉDITS
+                </div>
+                <p style="color: #888; margin-top: 10px; font-size: 0.9rem;">De quoi démarrer votre collection !</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section-bg-grid">
+        <h2 class="section-title">NOUVEAUX BOLIDES</h2>
+        
+        <div class="card-grid">
+            {% for card in latestCards %}
+                <div class="card-item">
+                    <div class="card-image-container">
+                        <div class="scanner-line"></div> {% if card.imagePath %}
+                            <img src="{{ asset('images/' ~ card.imagePath) }}" alt="{{ card.name }}">
+                        {% else %}
+                            <div style="height:100%; display:flex; align-items:center; justify-content:center; background:#111; color:#555;">
+                                <i class="fa-solid fa-car-side fa-3x"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-details">
+                        <h3 style="margin:0; font-size:1.4rem;">{{ card.name }}</h3>
+                        <span style="color:gray; font-size:0.9rem;">{{ card.brand }}</span>
+                        
+                        <div class="card-stats">
+                            <span style="color:white;"><i class="fa-solid fa-bolt"></i> {{ card.horsepower }} CH</span>
+                            <span class="rarity-{{ card.rarity|lower }}">{{ card.rarity }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p style="text-align:center; color:gray;">Aucun véhicule détecté dans la base de données.</p>
+            {% endfor %}
+        </div>
+        
+        {% if is_granted('ROLE_USER') %}
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{ path('app_card_index') }}" class="btn-cyber">VOIR TOUT LE CATALOGUE</a>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section-bg-data">
+        <div class="binary-line binary-line-1">11010010 01110101 01101110 01100100 01100101 01110010 01100111 01110010 01101111 01110101 01101110 01100100 00100000 01110010 01100001 01100011 01101001 01101110 01100111</div>
+        <div class="binary-line binary-line-2">01110010 01100101 01100100 01101100 01101001 01101110 01100101 00100000 01110010 01101001 01110110 01100001 01101100 01110011 00100000 01110011 01111001 01110011 01110100 01100101 01101101</div>
+        <div class="binary-line binary-line-3">01100011 01111001 01100010 01100101 01110010 00100000 01110011 01110000 01100101 01100101 01100100 00100000 01101110 01100101 01110100 01110111 01101111 01110010 01101011</div>
+        <div class="container" style="display:flex; flex-wrap:wrap; align-items:center; max-width:1000px; margin:0 auto; gap:50px; position: relative; z-index: 1;">
+            <div style="flex:1; min-width:300px;">
+                <h2 style="color:var(--primary); font-size:3rem; margin-bottom:10px;">L'UNDERGROUND</h2>
+                <p style="font-size:1.1rem; line-height:1.6; color:#aaa;">
+                    Bienvenue dans <strong>Redline Rivals</strong>. Ici, les lois de la circulation n'existent pas. 
+                    Nous sommes une communauté de passionnés, de tuners et de pilotes virtuels.
+                    <br><br>
+                    Le bitume est notre terrain de jeu, et votre garage est votre armurerie. 
+                    Avez-vous ce qu'il faut pour atteindre la zone rouge ?
+                </p>
+                <div style="margin-top:20px;">
+                    <span style="margin-right:20px;"><i class="fa-solid fa-users"></i> +10k Joueurs</span>
+                    <span style="margin-right:20px;"><i class="fa-solid fa-cards"></i> +500 Cartes</span>
+                    <span><i class="fa-solid fa-coins"></i> Économie active</span>
+                </div>
+            </div>
+            
+            <div style="flex:1; background:rgba(0,0,0,0.5); padding:30px; border:1px solid var(--accent); border-radius:10px;">
+                <h3 style="color:var(--accent);"><i class="fa-solid fa-server"></i> STATUS DU SERVEUR</h3>
+                <ul style="list-style:none; padding:0; margin-top:20px;">
+                    <li style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                        <span>Marché Noir</span> <span style="color:#0f0;">EN LIGNE</span>
+                    </li>
+                    <li style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                        <span>Système de Crédits</span> <span style="color:#0f0;">ACTIF</span>
+                    </li>
+                    <li style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                        <span>Matchmaking</span> <span style="color:orange;">INSTABLE</span>
+                    </li>
+                    <li style="margin-bottom:10px; display:flex; justify-content:space-between;">
+                        <span>Latence</span> <span style="color:#0f0;">24ms</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h3 style="color:white;">REDLINE RIVALS</h3>
+        <p style="color:gray; font-size:0.9rem;">&copy; {{ "now"|date("Y") }} - Tous droits réservés.</p>
+        <div style="margin-top:20px;">
+            <a href="#" style="color:white; margin:0 10px;"><i class="fa-brands fa-discord"></i></a>
+            <a href="#" style="color:white; margin:0 10px;"><i class="fa-brands fa-twitter"></i></a>
+            <a href="#" style="color:white; margin:0 10px;"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </footer>
+
+{% endblock %}

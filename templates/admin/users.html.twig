@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion Utilisateurs - Admin{% endblock %}
+
+{% block body %}
+
+<section class="hero" style="height: 30vh;">
+    <h1 class="glitch-title" style="font-size: 2.5rem;">UTILISATEURS</h1>
+</section>
+
+<section class="section-bg-scan">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+            <a href="{{ path('app_admin_index') }}" style="color: #555; text-decoration: none; font-size: 0.85rem;">
+                <i class="fa-solid fa-arrow-left"></i> Retour au panel
+            </a>
+            <p style="color: #555; font-size: 0.85rem; margin: 0;">{{ users|length }} utilisateur(s)</p>
+        </div>
+
+        <div id="flash-msg" style="display:none; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;"></div>
+
+        <div style="background: rgba(0,0,0,0.5); border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid #1a1a1a;">
+                        <th style="padding: 15px 20px; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">ID</th>
+                        <th style="padding: 15px 20px; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Email</th>
+                        <th style="padding: 15px 20px; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Rôle</th>
+                        <th style="padding: 15px 20px; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Crédits</th>
+                        <th style="padding: 15px 20px; text-align: left; color: #555; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    {% set isAdmin = 'ROLE_ADMIN' in user.roles %}
+                    {% set isSelf  = user == app.user %}
+                    <tr style="border-bottom: 1px solid #111;" id="row-{{ user.id }}">
+
+                        <td style="padding: 15px 20px; color: #555; font-family: monospace;">#{{ user.id }}</td>
+
+                        <td style="padding: 15px 20px; color: white;">
+                            {{ user.email }}
+                            {% if isSelf %}<span style="color: var(--accent); font-size: 0.7rem; margin-left: 8px;">VOUS</span>{% endif %}
+                        </td>
+
+                        <td style="padding: 15px 20px;">
+                            <span id="badge-{{ user.id }}" style="
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-size: 0.75rem;
+                                font-weight: bold;
+                                letter-spacing: 1px;
+                                background: {{ isAdmin ? 'rgba(255,0,60,0.15)' : 'rgba(255,255,255,0.05)' }};
+                                color: {{ isAdmin ? 'var(--primary)' : '#666' }};
+                                border: 1px solid {{ isAdmin ? 'var(--primary)' : '#333' }};
+                            ">
+                                {{ isAdmin ? 'ADMIN' : 'USER' }}
+                            </span>
+                        </td>
+
+                        <td style="padding: 15px 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span id="credits-{{ user.id }}" style="color: var(--gold); font-family: monospace; font-weight: bold;">{{ user.credits }}</span>
+                                <input type="number" id="credits-input-{{ user.id }}" value="{{ user.credits }}" min="0"
+                                    style="width: 80px; padding: 4px 8px; background: #111; border: 1px solid #333; color: white; border-radius: 6px; font-size: 0.85rem;">
+                                <button onclick="setCredits({{ user.id }})" style="padding: 4px 10px; background: rgba(255,200,0,0.1); border: 1px solid var(--gold); color: var(--gold); border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
+                                    OK
+                                </button>
+                            </div>
+                        </td>
+
+                        <td style="padding: 15px 20px;">
+                            {% if not isSelf %}
+                            <button onclick="toggleRole({{ user.id }})"
+                                id="btn-{{ user.id }}"
+                                style="
+                                    padding: 6px 16px;
+                                    border-radius: 6px;
+                                    font-size: 0.75rem;
+                                    cursor: pointer;
+                                    font-weight: bold;
+                                    letter-spacing: 1px;
+                                    border: 1px solid {{ isAdmin ? '#333' : 'var(--primary)' }};
+                                    background: {{ isAdmin ? 'transparent' : 'rgba(255,0,60,0.1)' }};
+                                    color: {{ isAdmin ? '#555' : 'var(--primary)' }};
+                                ">
+                                {{ isAdmin ? '— Retirer ADMIN' : '+ Accorder ADMIN' }}
+                            </button>
+                            {% else %}
+                            <span style="color: #333; font-size: 0.8rem;">—</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+<script>
+function flash(msg, ok) {
+    const el = document.getElementById('flash-msg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = ok ? 'rgba(0,255,200,0.08)' : 'rgba(255,0,60,0.08)';
+    el.style.border     = `1px solid ${ok ? 'var(--accent)' : 'var(--primary)'}`;
+    el.style.color      = ok ? 'var(--accent)' : 'var(--primary)';
+    setTimeout(() => el.style.display = 'none', 3000);
+}
+
+async function toggleRole(id) {
+    const res  = await fetch(`/admin/users/${id}/role`, { method: 'POST' });
+    const data = await res.json();
+
+    if (!data.success) { flash(data.message, false); return; }
+
+    const badge = document.getElementById(`badge-${id}`);
+    const btn   = document.getElementById(`btn-${id}`);
+
+    if (data.isAdmin) {
+        badge.textContent    = 'ADMIN';
+        badge.style.color    = 'var(--primary)';
+        badge.style.borderColor = 'var(--primary)';
+        badge.style.background  = 'rgba(255,0,60,0.15)';
+        btn.textContent      = '— Retirer ADMIN';
+        btn.style.color      = '#555';
+        btn.style.borderColor= '#333';
+        btn.style.background = 'transparent';
+    } else {
+        badge.textContent    = 'USER';
+        badge.style.color    = '#666';
+        badge.style.borderColor = '#333';
+        badge.style.background  = 'rgba(255,255,255,0.05)';
+        btn.textContent      = '+ Accorder ADMIN';
+        btn.style.color      = 'var(--primary)';
+        btn.style.borderColor= 'var(--primary)';
+        btn.style.background = 'rgba(255,0,60,0.1)';
+    }
+
+    flash(data.message, true);
+}
+
+async function setCredits(id) {
+    const amount = document.getElementById(`credits-input-${id}`).value;
+    const res    = await fetch(`/admin/users/${id}/credits`, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body   : `credits=${amount}`,
+    });
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById(`credits-${id}`).textContent = data.credits;
+        flash(`Crédits mis à jour : ${data.credits}`, true);
+    } else {
+        flash(data.message, false);
+    }
+}
+</script>
+
+{% endblock %}

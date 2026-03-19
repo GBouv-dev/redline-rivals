@@ -1,0 +1,723 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Marché Noir - Redline Rivals{% endblock %}
+
+{% block body %}
+
+{# ============================================================ HERO ======== #}
+<section class="hero" style="height: 40vh;">
+    <h1 class="glitch-title">MARCHÉ NOIR</h1>
+    <p style="font-size: 1.1rem; letter-spacing: 3px; color: #ccc;">
+        ÉCHANGEZ • VENDEZ • COLLECTIONNEZ
+    </p>
+    <div style="margin-top: 15px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <span style="color: var(--accent); font-size: 0.9rem;">
+            <i class="fa-solid fa-tag"></i> {{ listings|length }} annonce(s) active(s)
+        </span>
+        <span style="color: var(--gold); font-size: 0.9rem;">
+            <i class="fa-solid fa-wallet"></i> {{ app.user.credits }} crédits
+        </span>
+    </div>
+</section>
+
+<section class="section-bg-data" style="padding: 40px 20px 80px;">
+    <div class="binary-line binary-line-1">01110100 01110010 01100001 01100100 01100101</div>
+    <div class="binary-line binary-line-2">01101101 01100001 01110010 01101011 01100101 01110100</div>
+
+    <div style="max-width: 1300px; margin: 0 auto; position: relative; z-index: 1;">
+
+        {# ─── Flashes ──────────────────────────────────────────────────────── #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert-cyber alert-{{ label }}" style="margin-bottom: 20px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# ─── Tabs ─────────────────────────────────────────────────────────── #}
+        <div style="display: flex; gap: 0; margin-bottom: 30px; border-bottom: 2px solid var(--accent);">
+            <button class="tab-btn tab-active" data-tab="marketplace" onclick="switchTab('marketplace', this)">
+                <i class="fa-solid fa-store"></i> Place de marché
+            </button>
+            <button class="tab-btn" data-tab="mylistings" onclick="switchTab('mylistings', this)">
+                <i class="fa-solid fa-list"></i> Mes annonces
+                {% if myListings|filter(l => l.status == 'active')|length > 0 %}
+                    <span class="badge-count">{{ myListings|filter(l => l.status == 'active')|length }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="sell" onclick="switchTab('sell', this)">
+                <i class="fa-solid fa-plus"></i> Mettre en vente
+            </button>
+        </div>
+
+        {# ================================================================ #}
+        {# TAB — PLACE DE MARCHÉ                                           #}
+        {# ================================================================ #}
+        <div id="tab-marketplace" class="tab-content">
+
+            {# Filtres #}
+            <form method="GET" action="{{ path('app_game_market') }}"
+                  style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; align-items: flex-end;">
+
+                <div class="filter-group">
+                    <label>Recherche</label>
+                    <input type="text" name="search" placeholder="Nom / Marque…"
+                           value="{{ filters.search }}" class="input-cyber" style="width: 180px;">
+                </div>
+
+                <div class="filter-group">
+                    <label>Rareté</label>
+                    <select name="rarity" class="input-cyber">
+                        <option value="">Toutes</option>
+                        {% for r in ['common', 'rare', 'epic', 'legendary'] %}
+                            <option value="{{ r }}" {{ filters.rarity == r ? 'selected' : '' }}>
+                                {{ r|capitalize }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Prix max (¢)</label>
+                    <input type="number" name="maxPrice" min="1" placeholder="ex: 5000"
+                           value="{{ filters.maxPrice }}" class="input-cyber" style="width: 120px;">
+                </div>
+
+                <button type="submit" class="btn-cyber btn-sm">
+                    <i class="fa-solid fa-filter"></i> Filtrer
+                </button>
+                {% if filters.rarity or filters.maxPrice or filters.search %}
+                    <a href="{{ path('app_game_market') }}" class="btn-cyber btn-sm btn-outline">
+                        <i class="fa-solid fa-xmark"></i> Réinitialiser
+                    </a>
+                {% endif %}
+            </form>
+
+            {# Grille des annonces #}
+            {% if listings is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; color: var(--accent); opacity: 0.4;"></i>
+                    <p>Aucune annonce ne correspond à vos critères.</p>
+                </div>
+            {% else %}
+                <div class="market-grid">
+                    {% for listing in listings %}
+                        {% set card = listing.card %}
+                        {% set isMine = listing.seller == app.user %}
+                        <div class="market-card rarity-{{ card.rarity }}">
+                            {# Image #}
+                            <div class="market-card-img">
+                                {% if card.imagePath %}
+                                    <img src="{{ asset('images' ~ card.imagePath) }}" alt="{{ card.name }}">
+                                {% else %}
+                                    <div class="placeholder-img">
+                                        <i class="fa-solid fa-car"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="rarity-badge rarity-{{ card.rarity }}">{{ card.rarity|upper }}</span>
+                                {% if listing.quantity > 1 %}
+                                    <span class="qty-badge">x{{ listing.quantity }}</span>
+                                {% endif %}
+                            </div>
+
+                            {# Infos #}
+                            <div class="market-card-body">
+                                <h3 class="card-name">{{ card.name }}</h3>
+                                <p class="card-brand">
+                                    <i class="fa-solid fa-industry"></i> {{ card.brand }}
+                                </p>
+                                <div class="market-card-stats">
+                                    <span><i class="fa-solid fa-gauge-high"></i> {{ card.horsepower }} ch</span>
+                                    {% if card.speed %}<span><i class="fa-solid fa-road"></i> {{ card.speed }} km/h</span>{% endif %}
+                                    {% if card.acceleration %}<span><i class="fa-solid fa-bolt"></i> {{ card.acceleration }}s</span>{% endif %}
+                                    {% if card.handling %}<span><i class="fa-solid fa-circle-notch"></i> {{ card.handling }}/100</span>{% endif %}
+                                </div>
+                                <p class="seller-info">
+                                    <i class="fa-solid fa-user-ninja"></i>
+                                    {% if isMine %}
+                                        <span style="color: var(--accent);">Vous</span>
+                                    {% else %}
+                                        {{ listing.seller.username }}
+                                    {% endif %}
+                                    &bull; {{ listing.createdAt|date('d/m H:i') }}
+                                </p>
+                            </div>
+
+                            {# Prix + action #}
+                            <div class="market-card-footer">
+                                <span class="listing-price">
+                                    <i class="fa-solid fa-coins"></i> {{ listing.price }} ¢
+                                </span>
+                                {% if isMine %}
+                                    <button class="btn-cyber btn-sm btn-danger"
+                                            onclick="cancelListing({{ listing.id }}, this)">
+                                        <i class="fa-solid fa-ban"></i> Annuler
+                                    </button>
+                                {% else %}
+                                    <button class="btn-cyber btn-sm"
+                                            onclick="buyListing({{ listing.id }}, '{{ card.name|escape('js') }}', {{ listing.price }}, this)"
+                                            {{ app.user.credits < listing.price ? 'disabled title=Crédits insuffisants' : '' }}>
+                                        <i class="fa-solid fa-cart-shopping"></i> Acheter
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {# ================================================================ #}
+        {# TAB — MES ANNONCES                                              #}
+        {# ================================================================ #}
+        <div id="tab-mylistings" class="tab-content" style="display: none;">
+            {% if myListings is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-inbox" style="font-size: 3rem; color: var(--accent); opacity: 0.4;"></i>
+                    <p>Vous n'avez aucune annonce. Utilisez l'onglet <strong>Mettre en vente</strong> !</p>
+                </div>
+            {% else %}
+                <table class="table-cyber">
+                    <thead>
+                        <tr>
+                            <th>Carte</th>
+                            <th>Rareté</th>
+                            <th>Qté</th>
+                            <th>Prix</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for listing in myListings %}
+                            <tr class="{{ listing.status != 'active' ? 'row-dimmed' : '' }}">
+                                <td>
+                                    <strong style="color: white;">{{ listing.card.name }}</strong><br>
+                                    <small style="color: #888;">{{ listing.card.brand }}</small>
+                                </td>
+                                <td>
+                                    <span class="rarity-badge rarity-{{ listing.card.rarity }} badge-sm">
+                                        {{ listing.card.rarity|upper }}
+                                    </span>
+                                </td>
+                                <td style="color: var(--accent);">{{ listing.quantity }}</td>
+                                <td style="color: var(--gold);">{{ listing.price }} ¢</td>
+                                <td style="color: #888; font-size: 0.85rem;">{{ listing.createdAt|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    {% if listing.status == 'active' %}
+                                        <span style="color: #00ff88;"><i class="fa-solid fa-circle" style="font-size: 0.6rem;"></i> Actif</span>
+                                    {% elseif listing.status == 'sold' %}
+                                        <span style="color: var(--gold);"><i class="fa-solid fa-check"></i> Vendu</span>
+                                    {% else %}
+                                        <span style="color: #888;"><i class="fa-solid fa-ban"></i> Annulé</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if listing.status == 'active' %}
+                                        <button class="btn-cyber btn-sm btn-danger"
+                                                onclick="cancelListing({{ listing.id }}, this)">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+
+        {# ================================================================ #}
+        {# TAB — METTRE EN VENTE                                           #}
+        {# ================================================================ #}
+        <div id="tab-sell" class="tab-content" style="display: none;">
+            {% if sellableCards is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: var(--accent); opacity: 0.4;"></i>
+                    <p>Vous n'avez aucune carte à vendre. Ouvrez des boosters !</p>
+                    <a href="{{ path('app_game_inventory') }}" class="btn-cyber" style="margin-top: 20px;">
+                        <i class="fa-solid fa-boxes-stacked"></i> Mon inventaire
+                    </a>
+                </div>
+            {% else %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+
+                    {# Sélection de carte #}
+                    <div>
+                        <h3 style="color: var(--accent); margin-bottom: 20px; letter-spacing: 2px;">
+                            SÉLECTIONNER UNE CARTE
+                        </h3>
+                        <div class="sell-card-list">
+                            {% for userCard in sellableCards %}
+                                {% set card = userCard.card %}
+                                <div class="sell-card-item rarity-border-{{ card.rarity }}"
+                                     onclick="selectCard({{ card.id }}, '{{ card.name|escape('js') }}', {{ userCard.quantity }}, '{{ card.rarity }}')"
+                                     data-id="{{ card.id }}"
+                                     data-max="{{ userCard.quantity }}">
+                                    <div style="flex: 1;">
+                                        <strong style="color: white;">{{ card.name }}</strong>
+                                        <p style="color: #888; font-size: 0.85rem; margin: 2px 0;">
+                                            {{ card.brand }} • {{ card.horsepower }} ch
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span class="rarity-badge rarity-{{ card.rarity }} badge-sm">{{ card.rarity|upper }}</span>
+                                        <p style="color: var(--accent); font-size: 0.9rem; margin-top: 4px;">x{{ userCard.quantity }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# Formulaire de mise en vente #}
+                    <div>
+                        <h3 style="color: var(--accent); margin-bottom: 20px; letter-spacing: 2px;">
+                            CRÉER L'ANNONCE
+                        </h3>
+                        <div id="sell-form-container" style="background: rgba(0,243,255,0.05); border: 1px solid var(--accent); border-radius: 10px; padding: 30px;">
+
+                            <div id="sell-no-selection" style="text-align: center; color: #666; padding: 40px 0;">
+                                <i class="fa-solid fa-arrow-left" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                Sélectionnez une carte à gauche
+                            </div>
+
+                            <div id="sell-form" style="display: none;">
+                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,243,255,0.2);">
+                                    <div>
+                                        <p style="color: #aaa; font-size: 0.8rem; margin-bottom: 2px;">Carte sélectionnée</p>
+                                        <h4 id="sell-card-name" style="color: white; margin: 0;"></h4>
+                                        <span id="sell-card-rarity" class="rarity-badge badge-sm" style="margin-top: 4px;"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group-cyber">
+                                    <label>Quantité à vendre</label>
+                                    <input type="number" id="sell-quantity" min="1" value="1"
+                                           class="input-cyber" style="width: 100%;">
+                                    <small id="sell-qty-hint" style="color: #888;"></small>
+                                </div>
+
+                                <div class="form-group-cyber" style="margin-top: 15px;">
+                                    <label>Prix par carte (¢)</label>
+                                    <input type="number" id="sell-price" min="1" placeholder="ex: 500"
+                                           class="input-cyber" style="width: 100%;" oninput="updateSellTotal()">
+                                </div>
+
+                                <div id="sell-total" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(0,243,255,0.3); border-radius: 8px; padding: 12px 15px; margin-top: 15px; font-size: 0.95rem; color: #aaa; display: none;">
+                                    Total encaissé : <span id="sell-total-value" style="color: var(--gold); font-weight: bold;"></span> ¢
+                                </div>
+
+                                <input type="hidden" id="sell-card-id">
+
+                                <button class="btn-cyber" style="width: 100%; margin-top: 20px;"
+                                        onclick="submitListing()">
+                                    <i class="fa-solid fa-tag"></i> METTRE EN VENTE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{# ============================================================ MODAL CONFIRM #}
+<div id="buy-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-cyber">
+        <h3 style="color: var(--accent); margin-bottom: 15px;">
+            <i class="fa-solid fa-cart-shopping"></i> Confirmer l'achat
+        </h3>
+        <p id="buy-modal-text" style="color: #ccc; margin-bottom: 25px;"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn-cyber" onclick="confirmBuy()">
+                <i class="fa-solid fa-check"></i> Confirmer
+            </button>
+            <button class="btn-cyber btn-outline" onclick="closeModal()">
+                <i class="fa-solid fa-xmark"></i> Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ============================================================ TOAST ========= #}
+<div id="toast" class="toast-cyber" style="display: none;"></div>
+
+{# ============================================================ STYLES ======== #}
+<style>
+/* ── Tabs ──────────────────────────────────────────────────────────────── */
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #888;
+    padding: 12px 24px;
+    font-family: var(--font-cyber, 'Orbitron', monospace);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.tab-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.badge-count {
+    background: var(--accent);
+    color: #000;
+    font-size: 0.7rem;
+    border-radius: 50%;
+    padding: 1px 6px;
+    margin-left: 6px;
+    font-weight: bold;
+}
+
+/* ── Market grid ───────────────────────────────────────────────────────── */
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+.market-card {
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+.market-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,243,255,0.2);
+}
+.market-card.rarity-legendary { border-color: rgba(255,165,0,0.5); }
+.market-card.rarity-epic      { border-color: rgba(163,0,255,0.5); }
+.market-card.rarity-rare      { border-color: rgba(0,100,255,0.5); }
+
+.market-card-img {
+    position: relative;
+    height: 140px;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.market-card-img img  { width: 100%; height: 100%; object-fit: cover; }
+.placeholder-img { font-size: 3rem; color: #444; }
+.rarity-badge {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.rarity-badge.rarity-legendary { background: rgba(255,165,0,0.3); color: #ffa500; border: 1px solid #ffa500; }
+.rarity-badge.rarity-epic      { background: rgba(163,0,255,0.3); color: #a300ff; border: 1px solid #a300ff; }
+.rarity-badge.rarity-rare      { background: rgba(0,100,255,0.3); color: #4488ff; border: 1px solid #4488ff; }
+.rarity-badge.rarity-common    { background: rgba(255,255,255,0.1); color: #aaa;    border: 1px solid #555;    }
+.badge-sm { position: static !important; font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; }
+
+.qty-badge {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.8);
+    color: var(--accent);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--accent);
+}
+.market-card-body { padding: 14px; flex: 1; }
+.card-name  { color: white; font-size: 1rem; margin: 0 0 4px; }
+.card-brand { color: #888; font-size: 0.8rem; margin: 0 0 4px; }
+.market-card-stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px; font-size:0.75rem; color:#666; }
+.market-card-stats span { display:flex; align-items:center; gap:3px; }
+.market-card-stats i { color:var(--accent); opacity:.6; font-size:.65rem; }
+.seller-info { color: #666; font-size: 0.78rem; margin: 0; }
+.market-card-footer {
+    padding: 12px 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.listing-price { color: var(--gold, #ffd700); font-weight: bold; font-size: 0.95rem; }
+
+/* ── Table ─────────────────────────────────────────────────────────────── */
+.table-cyber { width: 100%; border-collapse: collapse; }
+.table-cyber th {
+    color: var(--accent); font-size: 0.8rem; letter-spacing: 1px;
+    text-align: left; padding: 10px 12px;
+    border-bottom: 1px solid rgba(0,243,255,0.3);
+}
+.table-cyber td {
+    padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #ccc; font-size: 0.9rem;
+}
+.row-dimmed { opacity: 0.5; }
+
+/* ── Sell list ─────────────────────────────────────────────────────────── */
+.sell-card-list { max-height: 500px; overflow-y: auto; padding-right: 6px; }
+.sell-card-item {
+    display: flex; align-items: center;
+    padding: 12px 15px; margin-bottom: 8px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.sell-card-item:hover, .sell-card-item.selected {
+    border-color: var(--accent);
+    background: rgba(0,243,255,0.08);
+}
+.rarity-border-legendary { border-left: 3px solid #ffa500 !important; }
+.rarity-border-epic       { border-left: 3px solid #a300ff !important; }
+.rarity-border-rare       { border-left: 3px solid #4488ff !important; }
+.rarity-border-common     { border-left: 3px solid #555 !important; }
+
+/* ── Forms ─────────────────────────────────────────────────────────────── */
+.input-cyber {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(0,243,255,0.3);
+    border-radius: 6px;
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.input-cyber:focus { border-color: var(--accent); }
+.form-group-cyber label {
+    display: block; color: #aaa; font-size: 0.8rem;
+    letter-spacing: 1px; margin-bottom: 6px;
+}
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-group label { color: #aaa; font-size: 0.75rem; letter-spacing: 1px; }
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+.btn-outline {
+    background: transparent !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--accent) !important;
+}
+.btn-danger {
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+}
+.btn-danger:hover { background: rgba(255,68,68,0.15) !important; }
+
+/* ── Modal ─────────────────────────────────────────────────────────────── */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-cyber {
+    background: #0a0a0a;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 440px; width: 90%;
+    text-align: center;
+}
+
+/* ── Toast ─────────────────────────────────────────────────────────────── */
+.toast-cyber {
+    position: fixed; bottom: 30px; right: 30px; z-index: 2000;
+    background: #0a0a0a;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 22px;
+    color: white;
+    font-size: 0.9rem;
+    min-width: 250px;
+    box-shadow: 0 4px 20px rgba(0,243,255,0.3);
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── Empty state ───────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center; padding: 60px 20px; color: #666;
+}
+.empty-state p { margin-top: 15px; font-size: 1rem; }
+
+/* ── Alert ─────────────────────────────────────────────────────────────── */
+.alert-cyber {
+    padding: 12px 18px; border-radius: 8px; font-size: 0.9rem;
+}
+.alert-success { background: rgba(0,255,136,0.1); border: 1px solid #00ff88; color: #00ff88; }
+.alert-error   { background: rgba(255,68,68,0.1);  border: 1px solid #ff4444; color: #ff4444; }
+</style>
+
+{# ============================================================ SCRIPTS ======= #}
+<script>
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+    document.getElementById('tab-' + tab).style.display = 'block';
+    btn.classList.add('tab-active');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.innerHTML = (isError ? '❌ ' : '✅ ') + msg;
+    t.style.borderColor = isError ? '#ff4444' : 'var(--accent)';
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 4000);
+}
+
+// ── Buy listing ───────────────────────────────────────────────────────────────
+let pendingBuyId   = null;
+let pendingBuyBtn  = null;
+
+function buyListing(id, name, price, btn) {
+    pendingBuyId  = id;
+    pendingBuyBtn = btn;
+    document.getElementById('buy-modal-text').innerHTML =
+        `Acheter <strong style="color:white;">${name}</strong> pour <strong style="color:var(--gold)">${price} ¢</strong> ?`;
+    document.getElementById('buy-modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('buy-modal').style.display = 'none';
+    pendingBuyId = null;
+}
+
+async function confirmBuy() {
+    closeModal();
+    if (!pendingBuyId) return;
+    const btn = pendingBuyBtn;
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await fetch(`/game/market/buy/${pendingBuyId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(data.message);
+            // Mettre à jour les crédits affichés
+            document.querySelectorAll('.credits-display').forEach(el => el.textContent = data.credits + ' ¢');
+            // Supprimer la carte du DOM
+            if (btn) btn.closest('.market-card')?.remove();
+        } else {
+            showToast(data.message, true);
+            if (btn) btn.disabled = false;
+        }
+    } catch {
+        showToast('Erreur réseau', true);
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ── Cancel listing ────────────────────────────────────────────────────────────
+async function cancelListing(id, btn) {
+    if (!confirm('Annuler cette annonce et récupérer la carte ?')) return;
+    btn.disabled = true;
+
+    try {
+        const res  = await fetch(`/game/market/cancel/${id}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(data.message);
+            btn.closest('tr, .market-card')?.remove();
+        } else {
+            showToast(data.message, true);
+            btn.disabled = false;
+        }
+    } catch {
+        showToast('Erreur réseau', true);
+        btn.disabled = false;
+    }
+}
+
+// ── Sell form ─────────────────────────────────────────────────────────────────
+let selectedCardId  = null;
+let selectedCardMax = 1;
+
+function selectCard(id, name, maxQty, rarity) {
+    // Highlight
+    document.querySelectorAll('.sell-card-item').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`.sell-card-item[data-id="${id}"]`)?.classList.add('selected');
+
+    selectedCardId  = id;
+    selectedCardMax = maxQty;
+
+    document.getElementById('sell-no-selection').style.display = 'none';
+    document.getElementById('sell-form').style.display         = 'block';
+
+    document.getElementById('sell-card-id').value  = id;
+    document.getElementById('sell-card-name').textContent = name;
+
+    const rarityBadge = document.getElementById('sell-card-rarity');
+    rarityBadge.textContent  = rarity.toUpperCase();
+    rarityBadge.className    = `rarity-badge rarity-${rarity} badge-sm`;
+
+    const qtyInput = document.getElementById('sell-quantity');
+    qtyInput.max   = maxQty;
+    qtyInput.value = 1;
+    document.getElementById('sell-qty-hint').textContent = `Max disponible : ${maxQty}`;
+    updateSellTotal();
+}
+
+function updateSellTotal() {
+    const price = parseInt(document.getElementById('sell-price')?.value) || 0;
+    const qty   = parseInt(document.getElementById('sell-quantity')?.value) || 1;
+    const total = document.getElementById('sell-total');
+    const val   = document.getElementById('sell-total-value');
+    if (price > 0) {
+        val.textContent  = (price * qty).toLocaleString('fr-FR');
+        total.style.display = 'block';
+    } else {
+        total.style.display = 'none';
+    }
+}
+
+async function submitListing() {
+    const cardId   = document.getElementById('sell-card-id').value;
+    const price    = document.getElementById('sell-price').value;
+    const quantity = document.getElementById('sell-quantity').value;
+
+    if (!cardId || !price || price <= 0) {
+        showToast('Renseignez un prix valide.', true); return;
+    }
+    if (quantity > selectedCardMax) {
+        showToast(`Vous ne possédez que ${selectedCardMax} exemplaire(s).`, true); return;
+    }
+
+    const body = new URLSearchParams({ card_id: cardId, price, quantity });
+
+    try {
+        const res  = await fetch('/game/market/list', { method: 'POST', body });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Annonce créée ! Rechargement…');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(data.message, true);
+        }
+    } catch {
+        showToast('Erreur réseau', true);
+    }
+}
+</script>
+
+{% endblock %}

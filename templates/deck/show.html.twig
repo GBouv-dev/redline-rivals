@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deck{% endblock %}
+
+{% block page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/tables.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/deckDetail.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="deck-detail-container">
+        <h1>Deck Details</h1>
+
+        <div class="deck-showcase">
+            {# ========================================
+               PANNEAU GAUCHE - INFORMATIONS DECK
+               ======================================== #}
+            <div class="deck-info-panel">
+                <div class="deck-info-content">
+                    {# Nom du deck #}
+                    <h2 class="deck-name-display">{{ deck.name }}</h2>
+
+                    {# Tableau des statistiques #}
+                    <table class="deck-stats-table">
+                        <tbody>
+                            <tr>
+                                <th>ID</th>
+                                <td>#{{ deck.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>{{ deck.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Max Cards</th>
+                                <td>
+                                    <span class="capacity-badge">{{ deck.maxCards }} CARDS</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {# Séparateur #}
+                    <div class="deck-separator"></div>
+
+                    {# Jauge de capacité (si tu as une relation avec les cartes) #}
+                    <div>
+                        <h3 style="font-family: var(--font-head); font-size: 0.85rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+                            Capacity Status
+                        </h3>
+                        <div class="capacity-meter">
+                            {# Calcul du pourcentage (remplace par la vraie logique si tu as deck.cards) #}
+                            {% set currentCards = deck.cards|default([])|length %}
+                            {% set percentage = deck.maxCards > 0 ? (currentCards / deck.maxCards * 100) : 0 %}
+                            
+                            <div class="capacity-meter-text">{{ currentCards }} / {{ deck.maxCards }}</div>
+                        </div>
+                    </div>
+
+                    {# Boutons d'action #}
+                    <div class="deck-actions">
+                        <a href="{{ path('app_deck_index') }}" class="deck-action-btn btn-back-deck">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+
+                        <a href="{{ path('app_deck_edit', {'id': deck.id}) }}" class="deck-action-btn btn-edit-deck">
+                            <i class="fas fa-edit"></i> Edit Deck
+                        </a>
+
+                        {# Si tu as une route pour ajouter des cartes au deck #}
+                        {# <a href="{{ path('app_deck_add_cards', {'id': deck.id}) }}" class="deck-action-btn btn-add-cards">
+                            <i class="fas fa-plus"></i> Add Cards
+                        </a> #}
+
+                        {{ include('deck/_delete_form.html.twig', {
+                            'btn_class': 'deck-action-btn btn-delete-deck'
+                        }) }}
+                    </div>
+                </div>
+            </div>
+
+            {# ========================================
+               PANNEAU DROIT - CARTES DU DECK
+               ======================================== #}
+            <div class="deck-cards-panel">
+                <div class="deck-cards-content">
+                    <h3 class="deck-cards-title">Cards in this Deck</h3>
+
+                    {# Si tu as une relation deck.cards, affiche les cartes #}
+                    {% if deck.cards is defined and deck.cards|length > 0 %}
+                        <div class="deck-cards-grid">
+                            {% for card in deck.cards %}
+                                <div class="deck-card-mini">
+                                    {% if card.imagePath %}
+                                        <img src="{{ asset('images/' ~ card.imagePath) }}" alt="{{ card.name }}">
+                                    {% else %}
+                                        <div style="width: 100%; height: 150px; background: rgba(255,255,255,0.05); border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                                            <i class="fas fa-car" style="font-size: 3rem; color: rgba(255,255,255,0.2);"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="deck-card-mini-name">{{ card.name }}</div>
+                                    
+                                    <div class="deck-card-mini-stats">
+                                        <span title="Constructeur">{{ card.brand }}</span>
+                                        <span title="Puissance">{{ card.horsepower }} ch</span>
+                                        {% if card.speed %}<span title="Vitesse max">{{ card.speed }} km/h</span>{% endif %}
+                                        {% if card.acceleration %}<span title="0-100">{{ card.acceleration }}s</span>{% endif %}
+                                        {% if card.handling %}<span title="Maniabilité">{{ card.handling }}/100</span>{% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Message si le deck est vide #}
+                        <div class="no-cards-message">
+                            No cards in this deck yet
+                            <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.6;">
+                                Add cards to your deck to build your ultimate loadout!
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+.deck-card-mini-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 6px;
+}
+.deck-card-mini-stats span {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: .62rem;
+    color: #666;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
+{% endblock %}

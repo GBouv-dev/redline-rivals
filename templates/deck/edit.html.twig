@@ -1,0 +1,431 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Deck{% endblock %}
+
+{% block page_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/tables.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/deckEdit.css') }}">
+    <link rel="stylesheet" href="{{ asset('css.buttons.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="deck-edit-container">
+        <h1>Edit Deck</h1>
+
+        <div class="deck-edit-form">
+            {{ form_start(form) }}
+                {# Nom du deck #}
+                <div class="deck-form-group">
+                    {{ form_label(form.name, 'Deck Name', {'label_attr': {'class': 'required'}}) }}
+                    {{ form_widget(form.name, {
+                        'attr': {
+                            'class': 'deck-form-control',
+                            'placeholder': 'Enter your deck name...'
+                        }
+                    }) }}
+                    {{ form_errors(form.name, {'attr': {'class': 'deck-form-error'}}) }}
+                    <span class="deck-form-help">Choose a memorable name for your tactical loadout</span>
+                </div>
+
+                {# Nombre maximum de cartes - ON ENLÈVE L'ID PERSONNALISÉ #}
+                <div class="deck-form-group">
+                    {{ form_label(form.maxCards, 'Maximum Cards', {'label_attr': {'class': 'required'}}) }}
+                    {{ form_widget(form.maxCards, {
+                        'attr': {
+                            'class': 'deck-form-control max-cards-input',
+                            'placeholder': '30',
+                            'min': '1',
+                            'max': '100'
+                        }
+                    }) }}
+                    {{ form_errors(form.maxCards, {'attr': {'class': 'deck-form-error'}}) }}
+                    
+                    <div class="capacity-help">
+                        <i class="fas fa-info-circle"></i>
+                        <span>
+                            Set the maximum number of cards this deck can hold. 
+                            Standard decks typically contain 30-60 cards.
+                        </span>
+                    </div>
+                </div>
+
+                {# Champ caché pour stocker les IDs des cartes sélectionnées #}
+                <input type="hidden" name="selected_cards" id="selected-cards-input" 
+                       value="{{ deck.cards|map(c => c.id)|join(',') }}">
+
+                {{ form_rest(form) }}
+
+                {# SECTION DE SÉLECTION DES CARTES #}
+                <div class="card-selection-section">
+                    <div class="card-selection-content">
+                        <div class="selection-header">
+                            <h3 class="selection-title">Select Cards</h3>
+                            
+                            <div class="card-counter">
+                                <span class="counter-label">Cards:</span>
+                                <span class="counter-value" id="selected-count">
+                                    {{ deck.cards|default([])|length }}
+                                </span>
+                                <span class="counter-max">/ <span id="max-cards-display">{{ deck.maxCards }}</span></span>
+                            </div>
+                        </div>
+
+                        {# Filtres #}
+                        <div class="selection-filters">
+                            <input 
+                                type="text" 
+                                class="filter-input" 
+                                id="search-cards" 
+                                placeholder="Search by name or brand..."
+                            >
+                            
+                            <select class="filter-select" id="filter-rarity">
+                                <option value="">All Rarities</option>
+                                <option value="common">Common</option>
+                                <option value="rare">Rare</option>
+                                <option value="epic">Epic</option>
+                                <option value="legendary">Legendary</option>
+                                <option value="mythic">Mythic</option>
+                            </select>
+
+                            <select class="filter-select" id="sort-cards">
+                                <option value="name">Sort by Name</option>
+                                <option value="horsepower">Sort by HP</option>
+                                <option value="rarity">Sort by Rarity</option>
+                                <option value="brand">Sort by Brand</option>
+                            </select>
+
+                            <button type="button" class="filter-reset" id="reset-filters">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+
+                        {# Grille de cartes #}
+                        <div class="selectable-cards-grid" id="cards-grid">
+                            {% if available_cards is defined and available_cards|length > 0 %}
+                                {% for card in available_cards %}
+                                    <div 
+                                        class="selectable-card {% if card in deck.cards|default([]) %}selected{% endif %}" 
+                                        data-card-id="{{ card.id }}"
+                                        data-card-name="{{ card.name|lower }}"
+                                        data-card-brand="{{ card.brand|lower }}"
+                                        data-card-rarity="{{ card.rarity|lower }}"
+                                        data-card-horsepower="{{ card.horsepower }}"
+                                    >
+                                        <span class="selectable-card-rarity {{ card.rarity|lower }}">
+                                            {{ card.rarity }}
+                                        </span>
+
+                                        {% if card.imagePath %}
+                                            <img 
+                                                src="{{ asset('images/' ~ card.imagePath) }}" 
+                                                alt="{{ card.name }}"
+                                                class="selectable-card-image"
+                                            >
+                                        {% else %}
+                                            <div class="selectable-card-placeholder">
+                                                <i class="fas fa-car"></i>
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="selectable-card-name">{{ card.name }}</div>
+
+                                        <div class="selectable-card-stats">
+                                            <div class="selectable-card-stat">
+                                                <span class="selectable-card-stat-label">CH</span>
+                                                <span class="selectable-card-stat-value">{{ card.horsepower }}</span>
+                                            </div>
+                                            <div class="selectable-card-stat">
+                                                <span class="selectable-card-stat-label">km/h</span>
+                                                <span class="selectable-card-stat-value">{{ card.speed ?? '—' }}</span>
+                                            </div>
+                                            <div class="selectable-card-stat">
+                                                <span class="selectable-card-stat-label">0-100</span>
+                                                <span class="selectable-card-stat-value">{{ card.acceleration is not null ? card.acceleration ~ 's' : '—' }}</span>
+                                            </div>
+                                            <div class="selectable-card-stat">
+                                                <span class="selectable-card-stat-label">Mani.</span>
+                                                <span class="selectable-card-stat-value">{{ card.handling ?? '—' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-cards-available" style="grid-column: 1 / -1;">
+                                    No cards available
+                                    <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.6;">
+                                        Create some cards first to add them to your deck!
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Boutons sélection #}
+                        <div class="selection-actions">
+                            <button type="button" class="selection-btn selection-btn-clear" id="clear-selection">
+                                <i class="fas fa-times"></i> Clear Selection
+                            </button>
+                            <button type="button" class="selection-btn selection-btn-select-all" id="select-all">
+                                <i class="fas fa-check-double"></i> Select All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {# Boutons d'action principaux #}
+                <div class="deck-form-actions">
+                    <button type="submit" class="deck-form-btn btn-update-deck">
+                        <i class="fas fa-save"></i> Update Deck
+                    </button>
+                    
+                    <a href="{{ path('app_deck_index') }}" class="deck-form-btn btn-back-deck-list">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            {{ form_end(form) }}
+
+            {# Zone de danger #}
+            <div class="deck-danger-zone">
+                <div class="deck-danger-content">
+                    <div class="deck-danger-text">
+                        <h3>Delete this deck</h3>
+                        <p>This action is permanent and cannot be undone. All associated data will be lost.</p>
+                    </div>
+                    {{ include('deck/_delete_form.html.twig', {
+                        'btn_class': 'deck-form-btn btn-delete-deck-form'
+                    }) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    (function() {
+        'use strict';
+        
+        console.log('🚀 Deck Edit JavaScript Loading...');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOMContentLoaded fired');
+            
+            // Trouver l'input maxCards par sa classe au lieu de l'ID
+            const maxCardsInput = document.querySelector('.max-cards-input');
+            const maxCardsDisplay = document.getElementById('max-cards-display');
+            const selectedCountDisplay = document.getElementById('selected-count');
+            const selectedCardsInput = document.getElementById('selected-cards-input');
+            const cardsGrid = document.getElementById('cards-grid');
+            const selectableCards = cardsGrid ? cardsGrid.querySelectorAll('.selectable-card') : [];
+            
+            console.log('📊 Elements check:');
+            console.log('  - maxCardsInput:', maxCardsInput ? '✓ (value: ' + maxCardsInput.value + ')' : '✗');
+            console.log('  - maxCardsDisplay:', maxCardsDisplay ? '✓' : '✗');
+            console.log('  - selectedCountDisplay:', selectedCountDisplay ? '✓' : '✗');
+            console.log('  - cardsGrid:', cardsGrid ? '✓' : '✗');
+            console.log('  - selectableCards:', selectableCards.length);
+            
+            if (!maxCardsInput || !cardsGrid || selectableCards.length === 0) {
+                console.error('❌ Missing required elements!');
+                if (!maxCardsInput) console.error('   → maxCardsInput is missing');
+                if (!cardsGrid) console.error('   → cardsGrid is missing');
+                if (selectableCards.length === 0) console.error('   → No selectable cards found');
+                return;
+            }
+            
+            console.log('✅ All elements found!');
+            
+            // Récupérer les IDs initialement sélectionnés
+            let selectedCardIds = selectedCardsInput.value 
+                ? selectedCardsInput.value.split(',').filter(id => id).map(id => parseInt(id))
+                : [];
+            
+            console.log('📝 Initial selected cards:', selectedCardIds);
+            
+            // Fonction de mise à jour du compteur
+            function updateCounter() {
+                const count = selectedCardIds.length;
+                const max = parseInt(maxCardsInput.value) || 0;
+                
+                selectedCountDisplay.textContent = count;
+                
+                selectedCountDisplay.classList.remove('at-capacity', 'near-capacity');
+                if (count >= max) {
+                    selectedCountDisplay.classList.add('at-capacity');
+                } else if (count >= max * 0.8) {
+                    selectedCountDisplay.classList.add('near-capacity');
+                }
+
+                selectableCards.forEach(card => {
+                    const cardId = parseInt(card.dataset.cardId);
+                    const isSelected = selectedCardIds.includes(cardId);
+                    
+                    if (!isSelected && count >= max) {
+                        card.classList.add('disabled');
+                    } else {
+                        card.classList.remove('disabled');
+                    }
+                });
+            }
+
+            // Changement du maxCards
+            maxCardsInput.addEventListener('input', function() {
+                console.log('🔢 MaxCards changed to:', this.value);
+                maxCardsDisplay.textContent = this.value;
+                updateCounter();
+            });
+
+            // Clic sur une carte
+            selectableCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    console.log('🖱️ Card clicked:', this.dataset.cardName);
+                    
+                    if (this.classList.contains('disabled')) {
+                        console.log('⚠️ Card is disabled');
+                        return;
+                    }
+
+                    const cardId = parseInt(this.dataset.cardId);
+                    const isSelected = selectedCardIds.includes(cardId);
+
+                    if (isSelected) {
+                        selectedCardIds = selectedCardIds.filter(id => id !== cardId);
+                        this.classList.remove('selected');
+                        console.log('➖ Card unselected, new count:', selectedCardIds.length);
+                    } else {
+                        const max = parseInt(maxCardsInput.value) || 0;
+                        if (selectedCardIds.length < max) {
+                            selectedCardIds.push(cardId);
+                            this.classList.add('selected');
+                            console.log('➕ Card selected, new count:', selectedCardIds.length);
+                        } else {
+                            console.log('⚠️ Capacity reached!');
+                        }
+                    }
+
+                    selectedCardsInput.value = selectedCardIds.join(',');
+                    updateCounter();
+                });
+            });
+
+            // Bouton Clear
+            const clearBtn = document.getElementById('clear-selection');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function() {
+                    console.log('🗑️ Clear selection');
+                    selectedCardIds = [];
+                    selectedCardsInput.value = '';
+                    selectableCards.forEach(card => card.classList.remove('selected'));
+                    updateCounter();
+                });
+            }
+
+            // Bouton Select All
+            const selectAllBtn = document.getElementById('select-all');
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', function() {
+                    console.log('✅ Select all');
+                    const max = parseInt(maxCardsInput.value) || 0;
+                    selectedCardIds = [];
+                    
+                    let count = 0;
+                    selectableCards.forEach(card => {
+                        if (count < max) {
+                            const cardId = parseInt(card.dataset.cardId);
+                            selectedCardIds.push(cardId);
+                            card.classList.add('selected');
+                            count++;
+                        }
+                    });
+
+                    selectedCardsInput.value = selectedCardIds.join(',');
+                    updateCounter();
+                    console.log('✅ Selected', count, 'cards');
+                });
+            }
+
+            // Filtrage par recherche
+            const searchInput = document.getElementById('search-cards');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    console.log('🔍 Search:', searchTerm);
+                    
+                    selectableCards.forEach(card => {
+                        const name = card.dataset.cardName || '';
+                        const brand = card.dataset.cardBrand || '';
+                        
+                        if (name.includes(searchTerm) || brand.includes(searchTerm)) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Filtrage par rareté
+            const rarityFilter = document.getElementById('filter-rarity');
+            if (rarityFilter) {
+                rarityFilter.addEventListener('change', function() {
+                    const rarity = this.value.toLowerCase();
+                    console.log('💎 Filter rarity:', rarity || 'all');
+                    
+                    selectableCards.forEach(card => {
+                        if (!rarity || card.dataset.cardRarity === rarity) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Tri des cartes
+            const sortSelect = document.getElementById('sort-cards');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function() {
+                    const sortBy = this.value;
+                    console.log('📊 Sort by:', sortBy);
+                    
+                    const cardsArray = Array.from(selectableCards);
+                    
+                    cardsArray.sort((a, b) => {
+                        if (sortBy === 'name') {
+                            return a.dataset.cardName.localeCompare(b.dataset.cardName);
+                        } else if (sortBy === 'horsepower') {
+                            return parseInt(b.dataset.cardHorsepower) - parseInt(a.dataset.cardHorsepower);
+                        } else if (sortBy === 'brand') {
+                            return a.dataset.cardBrand.localeCompare(b.dataset.cardBrand);
+                        } else if (sortBy === 'rarity') {
+                            const rarityOrder = {mythic: 5, legendary: 4, epic: 3, rare: 2, common: 1};
+                            return (rarityOrder[b.dataset.cardRarity] || 0) - (rarityOrder[a.dataset.cardRarity] || 0);
+                        }
+                        return 0;
+                    });
+
+                    cardsArray.forEach(card => cardsGrid.appendChild(card));
+                    console.log('✅ Cards sorted');
+                });
+            }
+
+            // Reset filtres
+            const resetBtn = document.getElementById('reset-filters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    console.log('🔄 Reset filters');
+                    if (searchInput) searchInput.value = '';
+                    if (rarityFilter) rarityFilter.value = '';
+                    if (sortSelect) sortSelect.value = 'name';
+                    selectableCards.forEach(card => card.style.display = '');
+                });
+            }
+
+            // Initialiser
+            updateCounter();
+            console.log('✅ Deck Edit JavaScript Ready!');
+        });
+    })();
+    </script>
+{% endblock %}

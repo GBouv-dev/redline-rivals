@@ -1,0 +1,691 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enchères - Redline Rivals{% endblock %}
+
+{% block body %}
+
+{# ══════════════════════════════════════════════════════════════ HERO ══════ #}
+<section class="hero" style="height: 40vh;">
+    <h1 class="glitch-title">ENCHÈRES</h1>
+    <p style="font-size: 1.1rem; letter-spacing: 3px; color: #ccc;">
+        MISEZ • GAGNEZ • DOMINEZ
+    </p>
+    <div style="margin-top: 15px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <span style="color: var(--accent); font-size: 0.9rem;">
+            <i class="fa-solid fa-gavel"></i> {{ auctions|length }} enchère(s) en cours
+        </span>
+        <span style="color: var(--gold); font-size: 0.9rem;">
+            <i class="fa-solid fa-wallet"></i>
+            <span class="credits-display">{{ app.user.credits }}</span> ¢
+        </span>
+    </div>
+</section>
+
+<section class="section-bg-data" style="padding: 40px 20px 80px;">
+    <div class="binary-line binary-line-1">01100001 01110101 01100011 01110100 01101001 01101111 01101110</div>
+    <div class="binary-line binary-line-2">01100010 01101001 01100100 00100000 01110111 01100001 01110010</div>
+
+    <div style="max-width: 1300px; margin: 0 auto; position: relative; z-index: 1;">
+
+        {# ─── Tabs ────────────────────────────────────────────────────────── #}
+        <div style="display: flex; gap: 0; margin-bottom: 30px; border-bottom: 2px solid var(--accent);">
+            <button class="tab-btn tab-active" onclick="switchTab('live', this)">
+                <i class="fa-solid fa-fire"></i> Enchères live
+                {% if auctions|length > 0 %}
+                    <span class="badge-count">{{ auctions|length }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" onclick="switchTab('mine', this)">
+                <i class="fa-solid fa-list"></i> Mes enchères
+            </button>
+            <button class="tab-btn" onclick="switchTab('create', this)">
+                <i class="fa-solid fa-plus"></i> Créer une enchère
+            </button>
+        </div>
+
+        {# Toast #}
+        <div id="toast" class="toast-cyber" style="display:none;"></div>
+
+        {# ══════════════════════════════════════════════════════════════════ #}
+        {# TAB LIVE                                                          #}
+        {# ══════════════════════════════════════════════════════════════════ #}
+        <div id="tab-live" class="tab-content">
+
+            {# Filtres #}
+            <form method="GET" action="{{ path('app_game_auctions') }}"
+                  style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:30px; align-items:flex-end;">
+                <div class="filter-group">
+                    <label>Recherche</label>
+                    <input type="text" name="search" placeholder="Nom / Marque…"
+                           value="{{ filters.search }}" class="input-cyber" style="width:180px;">
+                </div>
+                <div class="filter-group">
+                    <label>Rareté</label>
+                    <select name="rarity" class="input-cyber">
+                        <option value="">Toutes</option>
+                        {% for r in ['common','rare','epic','legendary'] %}
+                            <option value="{{ r }}" {{ filters.rarity == r ? 'selected' : '' }}>{{ r|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-cyber btn-sm">
+                    <i class="fa-solid fa-filter"></i> Filtrer
+                </button>
+                {% if filters.rarity or filters.search %}
+                    <a href="{{ path('app_game_auctions') }}" class="btn-cyber btn-sm btn-outline">
+                        <i class="fa-solid fa-xmark"></i> Reset
+                    </a>
+                {% endif %}
+            </form>
+
+            {% if auctions is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-gavel" style="font-size:3rem; color:var(--accent); opacity:0.4;"></i>
+                    <p>Aucune enchère en cours. Soyez le premier à en créer une !</p>
+                </div>
+            {% else %}
+                <div class="auction-grid">
+                    {% for auction in auctions %}
+                        {% set card   = auction.card %}
+                        {% set isMine = auction.seller == app.user %}
+                        {% set isLeading = auction.highestBidder == app.user %}
+
+                        <div class="auction-card rarity-{{ card.rarity }}" id="auction-{{ auction.id }}">
+
+                            {# Image #}
+                            <div class="auction-card-img">
+                                {% if card.imagePath %}
+                                    <img src="{{ asset('images' ~ card.imagePath) }}" alt="{{ card.name }}">
+                                {% else %}
+                                    <div class="placeholder-img"><i class="fa-solid fa-car"></i></div>
+                                {% endif %}
+                                <span class="rarity-badge rarity-{{ card.rarity }}">{{ card.rarity|upper }}</span>
+                                {% if isLeading %}
+                                    <div class="leading-badge"><i class="fa-solid fa-crown"></i> EN TÊTE</div>
+                                {% endif %}
+                                {% if isMine %}
+                                    <div class="mine-badge">MA MISE</div>
+                                {% endif %}
+                            </div>
+
+                            {# Infos carte #}
+                            <div class="auction-card-body">
+                                <h3 class="card-name">{{ card.name }}</h3>
+                                <p class="card-brand">
+                                    <i class="fa-solid fa-industry"></i> {{ card.brand }}
+                                </p>
+                                <div class="auction-card-stats">
+                                    <span><i class="fa-solid fa-gauge-high"></i> {{ card.horsepower }} ch</span>
+                                    {% if card.speed %}<span><i class="fa-solid fa-road"></i> {{ card.speed }} km/h</span>{% endif %}
+                                    {% if card.acceleration %}<span><i class="fa-solid fa-bolt"></i> {{ card.acceleration }}s</span>{% endif %}
+                                    {% if card.handling %}<span><i class="fa-solid fa-circle-notch"></i> {{ card.handling }}/100</span>{% endif %}
+                                </div>
+                                <p style="color:#888; font-size:0.78rem; margin:4px 0 0;">
+                                    <i class="fa-solid fa-user-ninja"></i> {{ auction.seller.username ?? auction.seller.email }}
+                                    &bull; {{ auction.bidCount }} mise(s)
+                                </p>
+                            </div>
+
+                            {# Prix + compte à rebours #}
+                            <div class="auction-price-row">
+                                <div>
+                                    <div style="color:#888; font-size:0.7rem; letter-spacing:1px;">ENCHÈRE ACTUELLE</div>
+                                    <div class="current-price" id="price-{{ auction.id }}" style="color:var(--gold); font-weight:bold; font-size:1.1rem;">
+                                        {{ auction.currentPrice }} ¢
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="color:#888; font-size:0.7rem; letter-spacing:1px;">FIN DANS</div>
+                                    <div class="countdown"
+                                         data-ends="{{ auction.endsAt|date('U') }}"
+                                         id="countdown-{{ auction.id }}"
+                                         style="color:var(--accent); font-family:monospace; font-size:0.95rem;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Action #}
+                            <div class="auction-card-footer">
+                                <span style="color:#888; font-size:0.78rem;">
+                                    Min suivant : <span id="min-{{ auction.id }}" style="color:white;">{{ auction.minimumNextBid }} ¢</span>
+                                </span>
+                                {% if not isMine %}
+                                    <button class="btn-cyber btn-sm"
+                                            onclick="openBidModal({{ auction.id }}, {{ auction.minimumNextBid }}, '{{ card.name|escape('js') }}')">
+                                        <i class="fa-solid fa-gavel"></i> Enchérir
+                                    </button>
+                                {% else %}
+                                    <span style="color:#666; font-size:0.8rem;"><i class="fa-solid fa-lock"></i> Votre enchère</span>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        {# ══════════════════════════════════════════════════════════════════ #}
+        {# TAB MES ENCHÈRES                                                  #}
+        {# ══════════════════════════════════════════════════════════════════ #}
+        <div id="tab-mine" class="tab-content" style="display:none;">
+            {% if myAuctions is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-inbox" style="font-size:3rem; color:var(--accent); opacity:0.4;"></i>
+                    <p>Aucune enchère en cours ou passée.</p>
+                </div>
+            {% else %}
+                <table class="table-cyber">
+                    <thead>
+                        <tr>
+                            <th>Carte</th>
+                            <th>Rareté</th>
+                            <th>Prix départ</th>
+                            <th>Prix actuel</th>
+                            <th>Enchères</th>
+                            <th>Fin</th>
+                            <th>Statut</th>
+                            <th>Rôle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for auction in myAuctions %}
+                            <tr class="{{ auction.status != 'active' ? 'row-dimmed' : '' }}">
+                                <td>
+                                    <strong style="color:white;">{{ auction.card.name }}</strong><br>
+                                    <small style="color:#888;">{{ auction.card.brand }}</small>
+                                </td>
+                                <td>
+                                    <span class="rarity-badge rarity-{{ auction.card.rarity }} badge-sm">
+                                        {{ auction.card.rarity|upper }}
+                                    </span>
+                                </td>
+                                <td style="color:#aaa;">{{ auction.startPrice }} ¢</td>
+                                <td style="color:var(--gold);">{{ auction.currentPrice }} ¢</td>
+                                <td style="color:var(--accent);">{{ auction.bidCount }}</td>
+                                <td style="color:#888; font-size:0.82rem;">{{ auction.endsAt|date('d/m H:i') }}</td>
+                                <td>
+                                    {% if auction.status == 'active' and auction.endsAt > date() %}
+                                        <span style="color:#00ff88;"><i class="fa-solid fa-circle" style="font-size:0.55rem;"></i> Live</span>
+                                    {% elseif auction.status == 'ended' %}
+                                        <span style="color:var(--gold);"><i class="fa-solid fa-check"></i> Terminée</span>
+                                    {% else %}
+                                        <span style="color:#888;">Expirée</span>
+                                    {% endif %}
+                                </td>
+                                <td style="font-size:0.82rem;">
+                                    {% if auction.seller == app.user %}
+                                        <span style="color:var(--accent);">Vendeur</span>
+                                    {% else %}
+                                        <span style="color:#aaa;">Enchérisseur</span>
+                                        {% if auction.winner == app.user %}
+                                            <span style="color:#ffd700;"> 🏆 Gagnant</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+
+        {# ══════════════════════════════════════════════════════════════════ #}
+        {# TAB CRÉER                                                         #}
+        {# ══════════════════════════════════════════════════════════════════ #}
+        <div id="tab-create" class="tab-content" style="display:none;">
+            {% if sellableCards is empty %}
+                <div class="empty-state">
+                    <i class="fa-solid fa-box-open" style="font-size:3rem; color:var(--accent); opacity:0.4;"></i>
+                    <p>Vous n'avez aucune carte à mettre en enchère.</p>
+                    <a href="{{ path('app_game_inventory') }}" class="btn-cyber" style="margin-top:20px;">
+                        <i class="fa-solid fa-boxes-stacked"></i> Mon inventaire
+                    </a>
+                </div>
+            {% else %}
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
+
+                    {# Liste des cartes #}
+                    <div>
+                        <h3 style="color:var(--accent); margin-bottom:20px; letter-spacing:2px;">SÉLECTIONNER UNE CARTE</h3>
+                        <div class="sell-card-list">
+                            {% for userCard in sellableCards %}
+                                {% set card = userCard.card %}
+                                <div class="sell-card-item rarity-border-{{ card.rarity }}"
+                                     onclick="selectCard({{ card.id }}, '{{ card.name|escape('js') }}', {{ userCard.quantity }}, '{{ card.rarity }}')"
+                                     data-id="{{ card.id }}"
+                                     data-max="{{ userCard.quantity }}">
+                                    <div style="flex:1;">
+                                        <strong style="color:white;">{{ card.name }}</strong>
+                                        <p style="color:#888; font-size:0.85rem; margin:2px 0;">{{ card.brand }} • {{ card.horsepower }} ch</p>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <span class="rarity-badge rarity-{{ card.rarity }} badge-sm">{{ card.rarity|upper }}</span>
+                                        <p style="color:var(--accent); font-size:0.9rem; margin-top:4px;">x{{ userCard.quantity }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# Formulaire #}
+                    <div>
+                        <h3 style="color:var(--accent); margin-bottom:20px; letter-spacing:2px;">PARAMÈTRES</h3>
+                        <div style="background:rgba(0,243,255,0.05); border:1px solid var(--accent); border-radius:10px; padding:30px;">
+
+                            <div id="create-no-selection" style="text-align:center; color:#666; padding:40px 0;">
+                                <i class="fa-solid fa-arrow-left" style="font-size:2rem; margin-bottom:10px; display:block;"></i>
+                                Sélectionnez une carte à gauche
+                            </div>
+
+                            <div id="create-form" style="display:none;">
+
+                                <div style="display:flex; align-items:center; gap:15px; margin-bottom:25px; padding-bottom:20px; border-bottom:1px solid rgba(0,243,255,0.2);">
+                                    <div>
+                                        <p style="color:#aaa; font-size:0.8rem; margin-bottom:2px;">Carte sélectionnée</p>
+                                        <h4 id="create-card-name" style="color:white; margin:0;"></h4>
+                                        <span id="create-card-rarity" class="rarity-badge badge-sm" style="margin-top:4px;"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group-cyber">
+                                    <label>Prix de départ (¢)</label>
+                                    <input type="number" id="create-start-price" min="1" placeholder="ex: 200"
+                                           class="input-cyber" style="width:100%;">
+                                </div>
+
+                                <div class="form-group-cyber" style="margin-top:15px;">
+                                    <label>Durée</label>
+                                    <select id="create-duration" class="input-cyber" style="width:100%;">
+                                        <option value="1">1 heure</option>
+                                        <option value="6">6 heures</option>
+                                        <option value="12">12 heures</option>
+                                        <option value="24" selected>24 heures</option>
+                                        <option value="48">2 jours</option>
+                                        <option value="72">3 jours</option>
+                                        <option value="168">7 jours</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group-cyber" style="margin-top:15px;">
+                                    <label>Quantité</label>
+                                    <input type="number" id="create-quantity" min="1" value="1"
+                                           class="input-cyber" style="width:100%;">
+                                    <small id="create-qty-hint" style="color:#888;"></small>
+                                </div>
+
+                                <input type="hidden" id="create-card-id">
+
+                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,243,255,0.3); border-radius:8px; padding:12px 15px; margin-top:15px; font-size:0.85rem; color:#888;">
+                                    <i class="fa-solid fa-info-circle" style="color:var(--accent);"></i>
+                                    Chaque nouvelle enchère doit dépasser la précédente de <strong style="color:white;">5% minimum</strong>.<br>
+                                    Si personne ne mise, la carte vous est restituée.
+                                </div>
+
+                                <button class="btn-cyber" style="width:100%; margin-top:20px;" onclick="submitAuction()">
+                                    <i class="fa-solid fa-gavel"></i> LANCER L'ENCHÈRE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+{# ══════════════════════════════════════════════════════ MODAL ENCHÈRE ════ #}
+<div id="bid-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-cyber">
+        <h3 style="color:var(--accent); margin-bottom:5px;">
+            <i class="fa-solid fa-gavel"></i> Placer une enchère
+        </h3>
+        <p id="bid-modal-card" style="color:#888; font-size:0.85rem; margin-bottom:20px;"></p>
+
+        <div class="form-group-cyber" style="margin-bottom:20px;">
+            <label>Votre mise (¢)</label>
+            <input type="number" id="bid-amount" class="input-cyber" style="width:100%; font-size:1.1rem;"
+                   oninput="updateBidInfo()">
+            <small id="bid-min-hint" style="color:var(--accent); margin-top:4px; display:block;"></small>
+        </div>
+
+        <div id="bid-cost-info" style="background:rgba(0,0,0,0.5); border:1px solid rgba(0,243,255,0.2); border-radius:8px; padding:12px; margin-bottom:20px; font-size:0.85rem; color:#aaa; display:none;">
+            Vos crédits après mise : <span id="bid-credits-after" style="color:white; font-weight:bold;"></span> ¢
+        </div>
+
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="btn-cyber" onclick="confirmBid()">
+                <i class="fa-solid fa-gavel"></i> Enchérir
+            </button>
+            <button class="btn-cyber btn-outline" onclick="closeBidModal()">
+                <i class="fa-solid fa-xmark"></i> Annuler
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════════ STYLES ═══ #}
+<style>
+/* Tabs */
+.tab-btn {
+    background: transparent; border: none;
+    border-bottom: 3px solid transparent;
+    color: #888; padding: 12px 24px;
+    font-family: var(--font-cyber, 'Orbitron', monospace);
+    font-size: 0.85rem; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.tab-active { color: var(--accent); border-bottom-color: var(--accent); }
+.badge-count {
+    background: var(--accent); color: #000;
+    font-size: 0.7rem; border-radius: 50%;
+    padding: 1px 6px; margin-left: 6px; font-weight: bold;
+}
+
+/* Grid */
+.auction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 22px;
+}
+.auction-card {
+    background: rgba(0,0,0,0.75);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.auction-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,243,255,0.2); }
+.auction-card.rarity-legendary { border-color: rgba(255,165,0,0.5); }
+.auction-card.rarity-epic      { border-color: rgba(163,0,255,0.5); }
+.auction-card.rarity-rare      { border-color: rgba(0,100,255,0.5); }
+
+/* Image */
+.auction-card-img {
+    position: relative; height: 150px;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.auction-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.placeholder-img { font-size: 3rem; color: #444; }
+.rarity-badge {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 0.65rem; padding: 2px 7px;
+    border-radius: 4px; font-weight: bold; letter-spacing: 1px;
+}
+.rarity-badge.rarity-legendary { background: rgba(255,165,0,0.3); color: #ffa500; border: 1px solid #ffa500; }
+.rarity-badge.rarity-epic      { background: rgba(163,0,255,0.3); color: #a300ff; border: 1px solid #a300ff; }
+.rarity-badge.rarity-rare      { background: rgba(0,100,255,0.3); color: #4488ff; border: 1px solid #4488ff; }
+.rarity-badge.rarity-common    { background: rgba(255,255,255,0.1); color: #aaa; border: 1px solid #555; }
+.badge-sm { position: static !important; font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; }
+.leading-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(255,215,0,0.2); color: #ffd700;
+    border: 1px solid #ffd700; font-size: 0.65rem;
+    padding: 2px 7px; border-radius: 4px; font-weight: bold;
+}
+.mine-badge {
+    position: absolute; bottom: 8px; left: 8px;
+    background: rgba(0,243,255,0.15); color: var(--accent);
+    border: 1px solid var(--accent); font-size: 0.65rem;
+    padding: 2px 7px; border-radius: 4px;
+}
+
+.auction-card-body { padding: 14px; flex: 1; }
+.card-name  { color: white; font-size: 1rem; margin: 0 0 4px; }
+.card-brand { color: #888; font-size: 0.8rem; margin: 0 0 4px; }
+.auction-card-stats { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px; font-size:0.75rem; color:#666; }
+.auction-card-stats span { display:flex; align-items:center; gap:3px; }
+.auction-card-stats i { color:var(--accent); opacity:.6; font-size:.65rem; }
+.auction-price-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+.auction-card-footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Table */
+.table-cyber { width: 100%; border-collapse: collapse; }
+.table-cyber th {
+    color: var(--accent); font-size: 0.8rem; letter-spacing: 1px;
+    text-align: left; padding: 10px 12px;
+    border-bottom: 1px solid rgba(0,243,255,0.3);
+}
+.table-cyber td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; font-size: 0.9rem; }
+.row-dimmed { opacity: 0.5; }
+
+/* Sell card list */
+.sell-card-list { max-height: 500px; overflow-y: auto; padding-right: 6px; }
+.sell-card-item {
+    display: flex; align-items: center;
+    padding: 12px 15px; margin-bottom: 8px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; cursor: pointer; transition: all 0.15s;
+}
+.sell-card-item:hover, .sell-card-item.selected {
+    border-color: var(--accent); background: rgba(0,243,255,0.08);
+}
+.rarity-border-legendary { border-left: 3px solid #ffa500 !important; }
+.rarity-border-epic       { border-left: 3px solid #a300ff !important; }
+.rarity-border-rare       { border-left: 3px solid #4488ff !important; }
+.rarity-border-common     { border-left: 3px solid #555 !important; }
+
+/* Inputs */
+.input-cyber {
+    background: rgba(0,0,0,0.6); border: 1px solid rgba(0,243,255,0.3);
+    border-radius: 6px; color: white; padding: 8px 12px;
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+}
+.input-cyber:focus { border-color: var(--accent); }
+.form-group-cyber label { display: block; color: #aaa; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 6px; }
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.filter-group label { color: #aaa; font-size: 0.75rem; letter-spacing: 1px; }
+
+/* Buttons */
+.btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+.btn-outline { background: transparent !important; border: 1px solid var(--accent) !important; color: var(--accent) !important; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-cyber {
+    background: #0a0a0a; border: 2px solid var(--accent);
+    border-radius: 12px; padding: 40px;
+    max-width: 420px; width: 90%; text-align: center;
+}
+
+/* Toast */
+.toast-cyber {
+    position: fixed; bottom: 30px; right: 30px; z-index: 2000;
+    background: #0a0a0a; border: 1px solid var(--accent);
+    border-radius: 8px; padding: 14px 22px; color: white;
+    font-size: 0.9rem; min-width: 250px;
+    box-shadow: 0 4px 20px rgba(0,243,255,0.3);
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Countdown urgency */
+.countdown.urgent { color: #ff4444 !important; animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.4; } }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: #666; }
+.empty-state p { margin-top: 15px; font-size: 1rem; }
+</style>
+
+{# ══════════════════════════════════════════════════════════════ SCRIPTS ══ #}
+<script>
+const USER_CREDITS = {{ app.user.credits }};
+let myCredits = USER_CREDITS;
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+    document.getElementById('tab-' + tab).style.display = 'block';
+    btn.classList.add('tab-active');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.innerHTML = (isError ? '❌ ' : '✅ ') + msg;
+    t.style.borderColor = isError ? '#ff4444' : 'var(--accent)';
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 4000);
+}
+
+// ── Countdowns ────────────────────────────────────────────────────────────
+function formatCountdown(seconds) {
+    if (seconds <= 0) return 'TERMINÉE';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}h ${String(m).padStart(2,'0')}m`;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function updateCountdowns() {
+    document.querySelectorAll('.countdown').forEach(el => {
+        const endsAt  = parseInt(el.dataset.ends);
+        const seconds = endsAt - Math.floor(Date.now() / 1000);
+        el.textContent = formatCountdown(seconds);
+        el.classList.toggle('urgent', seconds > 0 && seconds < 300);
+    });
+}
+setInterval(updateCountdowns, 1000);
+updateCountdowns();
+
+// ── Bid modal ─────────────────────────────────────────────────────────────
+let pendingAuctionId = null;
+let pendingMinBid    = 0;
+
+function openBidModal(auctionId, minBid, cardName) {
+    pendingAuctionId = auctionId;
+    pendingMinBid    = minBid;
+    document.getElementById('bid-modal-card').textContent = cardName;
+    document.getElementById('bid-amount').value = minBid;
+    document.getElementById('bid-amount').min   = minBid;
+    document.getElementById('bid-min-hint').textContent = `Minimum : ${minBid} ¢`;
+    updateBidInfo();
+    document.getElementById('bid-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('bid-amount').focus(), 100);
+}
+
+function closeBidModal() {
+    document.getElementById('bid-modal').style.display = 'none';
+    pendingAuctionId = null;
+}
+
+function updateBidInfo() {
+    const amount = parseInt(document.getElementById('bid-amount').value) || 0;
+    const info   = document.getElementById('bid-cost-info');
+    const after  = document.getElementById('bid-credits-after');
+    if (amount > 0) {
+        after.textContent = (myCredits - amount).toLocaleString('fr-FR');
+        info.style.display = 'block';
+        after.style.color  = (myCredits - amount) < 0 ? '#ff4444' : 'white';
+    } else {
+        info.style.display = 'none';
+    }
+}
+
+async function confirmBid() {
+    const amount = parseInt(document.getElementById('bid-amount').value);
+    if (!amount || amount < pendingMinBid) {
+        showToast(`Enchère minimum : ${pendingMinBid} ¢`, true); return;
+    }
+
+    const body = new URLSearchParams({ amount });
+    try {
+        const res  = await fetch(`/game/auctions/bid/${pendingAuctionId}`, { method: 'POST', body });
+        const data = await res.json();
+        closeBidModal();
+
+        if (data.success) {
+            showToast(data.message);
+            myCredits = data.credits;
+            document.querySelectorAll('.credits-display').forEach(el => el.textContent = data.credits);
+
+            // Mettre à jour la carte dans le DOM
+            const priceEl = document.getElementById(`price-${pendingAuctionId}`);
+            const minEl   = document.getElementById(`min-${pendingAuctionId}`);
+            if (priceEl) priceEl.textContent = data.currentPrice + ' ¢';
+            if (minEl)   minEl.textContent   = data.minimumNext + ' ¢';
+        } else {
+            showToast(data.message, true);
+        }
+    } catch {
+        closeBidModal();
+        showToast('Erreur réseau', true);
+    }
+}
+
+// ── Create auction ────────────────────────────────────────────────────────
+let selectedCardId  = null;
+let selectedCardMax = 1;
+
+function selectCard(id, name, maxQty, rarity) {
+    document.querySelectorAll('.sell-card-item').forEach(el => el.classList.remove('selected'));
+    document.querySelector(`.sell-card-item[data-id="${id}"]`)?.classList.add('selected');
+
+    selectedCardId  = id;
+    selectedCardMax = maxQty;
+
+    document.getElementById('create-no-selection').style.display = 'none';
+    document.getElementById('create-form').style.display         = 'block';
+    document.getElementById('create-card-id').value              = id;
+    document.getElementById('create-card-name').textContent      = name;
+
+    const badge = document.getElementById('create-card-rarity');
+    badge.textContent = rarity.toUpperCase();
+    badge.className   = `rarity-badge rarity-${rarity} badge-sm`;
+
+    document.getElementById('create-quantity').max = maxQty;
+    document.getElementById('create-qty-hint').textContent = `Max : ${maxQty}`;
+}
+
+async function submitAuction() {
+    const cardId   = document.getElementById('create-card-id').value;
+    const price    = document.getElementById('create-start-price').value;
+    const duration = document.getElementById('create-duration').value;
+    const quantity = document.getElementById('create-quantity').value;
+
+    if (!cardId || !price || price <= 0) {
+        showToast('Renseignez un prix de départ valide.', true); return;
+    }
+
+    const body = new URLSearchParams({ card_id: cardId, start_price: price, duration_hours: duration, quantity });
+
+    try {
+        const res  = await fetch('/game/auctions/create', { method: 'POST', body });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Enchère lancée ! Rechargement…');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(data.message, true);
+        }
+    } catch {
+        showToast('Erreur réseau', true);
+    }
+}
+</script>
+
+{% endblock %}

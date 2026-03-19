@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}REGISTER // REDLINE RIVALS
+{% endblock %}
+
+{% block page_stylesheets %}
+	<link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+{% endblock %}
+
+{% block body %}
+	{# On utilise la classe existante section-bg-scan pour le fond animé #}
+	<div class="section-bg-scan flex-center-screen">
+
+		<div class="cyber-auth-card">
+			<div class="card-decoration top-left"></div>
+			<div class="card-decoration bottom-right"></div>
+
+			<h1 class="section-title" style="margin-bottom: 30px; font-size: 2rem;">
+				NOUVEAU PILOTE
+			</h1>
+
+			{# Affichage des erreurs globales avec un style alerte #}
+			{% if form_errors(registrationForm) %}
+				<div class="cyber-alert">
+					{{ form_errors(registrationForm) }}
+				</div>
+			{% endif %}
+
+			{{ form_start(registrationForm, {'attr': {'class': 'cyber-form'}}) }}
+
+			<div class="form-group">
+				{{ form_label(registrationForm.email, 'Identifiant (Email)', {'label_attr': {'class': 'cyber-label'}}) }}
+				{{ form_widget(registrationForm.email, {'attr': {'class': 'cyber-input', 'placeholder': 'pilote@redline.com'}}) }}
+				<div class="form-error">{{ form_errors(registrationForm.email) }}</div>
+			</div>
+
+			<div class="form-group">
+				{{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'cyber-label'}}) }}
+				{{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'cyber-input', 'placeholder': '••••••••'}}) }}
+				<div class="form-error">{{ form_errors(registrationForm.plainPassword) }}</div>
+			</div>
+
+			<div class="form-group checkbox-group">
+				{{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'cyber-checkbox'}}) }}
+				{{ form_label(registrationForm.agreeTerms, 'J\'accepte les conditions du protocole', {'label_attr': {'class': 'cyber-label-check'}}) }}
+            </div>
+
+            <button type="submit" class="btn-cyber btn-primary w-100">
+                INITIALISER L'COMPTE
+            </button>
+            
+            <div class="auth-footer">
+                Déjà enregistré ? <a href="{{ path('app_login') }}" class="link-accent">Connexion</a>
+            </div>
+
+        {{ form_end(registrationForm) }}
+			</div>
+		</div>
+	{% endblock %}
